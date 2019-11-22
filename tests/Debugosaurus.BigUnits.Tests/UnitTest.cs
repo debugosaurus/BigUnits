@@ -1,28 +1,30 @@
 using Debugosaurus.BigUnits.Framework;
-using System;
-using Xunit;
 
 namespace Debugosaurus.BigUnits.Tests
 {
     public abstract class UnitTest<T> where T : class
     {
-        private readonly BigUnit bigUnit;
+        private BigUnitBuilder bigUnitBuilder;
 
         protected UnitTest() 
         {
-            bigUnit = new BigUnit(
-                TestScopes.Class<T>(),
-                new TestInstanceProvider(
-                    TestScopes.Class<T>(),
-                    new GreedyConstructorStrategy())
-            );
+            bigUnitBuilder = new BigUnitBuilder()
+                .WithTestScope(TestScopes.Class<T>());
+        }
+
+        private BigUnit BigUnit
+        {
+            get
+            {
+                return bigUnitBuilder.Build();
+            }
         }
 
         protected T TestInstance
         {
             get
             {
-                return bigUnit.GetTestInstance<T>();
+                return BigUnit.GetTestInstance<T>();
             }
         }
     }
