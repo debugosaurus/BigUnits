@@ -6,6 +6,8 @@ namespace Debugosaurus.BigUnits.Framework
 
         private IConstructorStrategy constructorStrategy;
 
+        private IDependencyProvider dependencyProvider;
+
         private BigUnit bigUnit;
 
         public BigUnitBuilder()
@@ -28,6 +30,13 @@ namespace Debugosaurus.BigUnits.Framework
             return this;
         }
 
+        public BigUnitBuilder WithDependencyProvider(IDependencyProvider dependencyProvider)
+        {
+            bigUnit = null;
+            this.dependencyProvider = dependencyProvider;
+            return this;
+        }
+
         public BigUnit Build()
         {
             if(bigUnit == null)
@@ -36,7 +45,8 @@ namespace Debugosaurus.BigUnits.Framework
                     testScope,
                     new TestInstanceProvider(
                         testScope,
-                        constructorStrategy
+                        constructorStrategy,
+                        dependencyProvider
                     )
                 );
             }

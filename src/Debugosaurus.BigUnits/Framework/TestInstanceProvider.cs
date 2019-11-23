@@ -10,14 +10,18 @@ namespace Debugosaurus.BigUnits.Framework
 
         private readonly IConstructorStrategy constructorStrategy;
 
+        private readonly IDependencyProvider dependencyProvider;
+
         private readonly IDictionary<Type,object> dependencies = new Dictionary<Type, object>();
 
         public TestInstanceProvider(
             ITestScope testScope,
-            IConstructorStrategy constructorStrategy)
+            IConstructorStrategy constructorStrategy,
+            IDependencyProvider dependencyProvider)
         {
             this.testScope = testScope;
             this.constructorStrategy = constructorStrategy;
+            this.dependencyProvider = dependencyProvider;
         }
 
         public object CreateInstance(Type type)
@@ -68,7 +72,7 @@ namespace Debugosaurus.BigUnits.Framework
                 }
             }
             
-            return null;
+            return dependencyProvider.GetDependency(parameterInfo.ParameterType);
         }
 
         public void SetDependency<TDependency>(TDependency dependency)
