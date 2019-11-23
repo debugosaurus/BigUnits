@@ -32,5 +32,10 @@ namespace Debugosaurus.BigUnits.Tests
         {
             BigUnit.SetDependency(dependency);
         }
+
+        protected TDependency GetDependency<TDependency>()
+        {
+            return BigUnit.GetDependency<TDependency>();
+        }
     }
 }

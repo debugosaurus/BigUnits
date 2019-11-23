@@ -79,5 +79,14 @@ namespace Debugosaurus.BigUnits.Framework
         {
             dependencies.Add(typeof(TDependency),dependency);
         }
+
+        public TDependency GetDependency<TDependency>()
+        {
+            dependencies.TryGetValue(
+                typeof(TDependency),
+                out var result);
+
+            return (TDependency) result;
+        }
     }
 }

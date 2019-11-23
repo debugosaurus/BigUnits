@@ -1,3 +1,4 @@
+using Debugosaurus.BigUnits.Tests.Fakes;
 using Debugosaurus.BigUnits.Tests.TestTypes;
 using Debugosaurus.BigUnits.Framework;
 using Xunit;
@@ -8,49 +9,19 @@ using System.Collections.Generic;
 
 namespace Debugosaurus.BigUnits.Tests.Framework
 {
-    public class FakeDependencyProvider : IDependencyProvider
-    {
-        public IDictionary<Type, object> Audit = new Dictionary<Type, object>();
-
-        public object GetDependency(Type type)
-        {
-            if(type == typeof(IDependency))
-            {
-                var result = new FakeDependency();
-                Audit[type] = result;
-                return result;
-            }
-            else if(type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IDependency<>))
-            {
-                var dependencyType = type.GetGenericArguments()[0];
-                var fakeDependencyType = typeof(FakeDependency<>).MakeGenericType(dependencyType);
-
-                var result = Activator.CreateInstance(fakeDependencyType);
-
-                Audit[type] = result;
-
-                return result;
-            }
-
-            return null;
-        }
-
-        public class FakeDependency : IDependency {}
-        public class FakeDependency<T> : IDependency<T> {}
-    }
-
     public class BigUnitTests : IntegrationTest<BigUnit>
     {
         [Theory]
         [MemberData(nameof(PublicClasses.Data), MemberType=typeof(PublicClasses))]
         public void ClassScopeCanProvideTestInstancesForConcreteClasses(Type testInstanceType)
         {
-            var dependencyProvider = new FakeDependencyProvider();
-
             GivenTheTestScopeIs(TestScopes.Class(testInstanceType));
-            GivenTheDependencyProviderIs(dependencyProvider);
+            
+            GivenTheDependencyProviderIs(new FakeDependencyProvider());
 
-            var result = WhenATestInstanceIsRequested(testInstanceType);
+            WhenATestInstanceIsRequested(
+                testInstanceType,
+                out var result);
 
             ThenAConcreteTestInstanceIsProvided(
                 result,
@@ -58,8 +29,7 @@ namespace Debugosaurus.BigUnits.Tests.Framework
 
             ThenAllDependenciesAreMocked(
                 result,
-                testInstanceType,
-                dependencyProvider);
+                testInstanceType);
         }
 
         protected void GivenTheDependencyProviderIs(IDependencyProvider dependencyProvider)
@@ -69,16 +39,17 @@ namespace Debugosaurus.BigUnits.Tests.Framework
 
         protected void ThenAllDependenciesAreMocked(
             object result, 
-            Type testInstanceType,
-            FakeDependencyProvider dependencyProvider)
+            Type testInstanceType)
         {
+            var dependencyProvider = GetDependency<IDependencyProvider>();
+
             foreach(var dependencyField in testInstanceType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance))
             {
                 var dependency = dependencyField.GetValue(result);
                 var dependencyType = dependencyField.FieldType;
 
                 dependency.ShouldNotBeNull();
-                dependency.ShouldBe(dependencyProvider.Audit[dependencyType]);
+                dependency.ShouldBe(dependencyProvider.GetDependency(dependencyType));
             }    
         }
 
@@ -87,9 +58,11 @@ namespace Debugosaurus.BigUnits.Tests.Framework
             SetDependency(testScope);
         }
 
-        protected object WhenATestInstanceIsRequested(Type testInstanceType)
+        protected void WhenATestInstanceIsRequested(
+            Type testInstanceType,
+            out object result)
         {
-            return TestInstance.GetTestInstance(testInstanceType);
+            result = TestInstance.GetTestInstance(testInstanceType);
         }
 
         protected void ThenAConcreteTestInstanceIsProvided(
