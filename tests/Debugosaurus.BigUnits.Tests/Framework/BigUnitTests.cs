@@ -32,6 +32,25 @@ namespace Debugosaurus.BigUnits.Tests.Framework
                 testInstanceType);
         }
 
+        [Theory]
+        [MemberData(nameof(PublicClasses.Data), MemberType=typeof(PublicClasses))]
+        public void SameTestInstanceIsRetrievedEachTimeItIsRequested(Type testInstanceType)
+        {
+            GivenTheTestScopeIs(TestScopes.Class(testInstanceType));
+            
+            GivenTheDependencyProviderIs(new FakeDependencyProvider());
+
+            WhenATestInstanceIsRequested(
+                testInstanceType,
+                out var firstResult);
+
+            WhenATestInstanceIsRequested(
+                testInstanceType,
+                out var secondResult);
+
+            secondResult.ShouldBe(firstResult);
+        }
+
         protected void GivenTheDependencyProviderIs(IDependencyProvider dependencyProvider)
         {
             SetDependency(dependencyProvider);
