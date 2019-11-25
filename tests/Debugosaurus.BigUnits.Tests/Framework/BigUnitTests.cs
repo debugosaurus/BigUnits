@@ -1,37 +1,43 @@
-using Debugosaurus.BigUnits.Tests;
+using Debugosaurus.BigUnits.Tests.TestTypes;
 using Debugosaurus.BigUnits.Framework;
 using Xunit;
 using Shouldly;
+using System;
 
 namespace Debugosaurus.BigUnits.Tests.Framework
 {
     public class BigUnitTests : IntegrationTest<BigUnit>
     {
-        [Fact]
-        public void ClassScopeCanProvideTestInstancesForConcreteClasses()
+        [Theory]
+        [MemberData(nameof(PublicClasses.Data), MemberType=typeof(PublicClasses))]
+        public void ClassScopeCanProvideTestInstancesForConcreteClasses(Type testInstanceType)
         {
-            GivenTheTestScopeIs(TestScopes.Class<object>());
+            GivenTheTestScopeIs(TestScopes.Class(testInstanceType));
+            
+            var result = WhenATestInstanceIsRequested(testInstanceType);
 
-            var result = WhenATestInstanceIsRequested<object>();
-
-            ThenAConcreteTestInstanceIsProvided<object>(result);
+            ThenAConcreteTestInstanceIsProvided(
+                result,
+                testInstanceType);
         }
 
         protected void GivenTheTestScopeIs(ITestScope testScope)
         {
-            TestInstance.TestScope = testScope;
+            SetDependency(testScope);
         }
 
-        protected TTestInstance WhenATestInstanceIsRequested<TTestInstance>() where TTestInstance : class, new()
+        protected object WhenATestInstanceIsRequested(Type testInstanceType)
         {
-            return TestInstance.GetTestInstance<TTestInstance>();
+            return TestInstance.GetTestInstance(testInstanceType);
         }
 
-        protected void ThenAConcreteTestInstanceIsProvided<TTestInstance>(object result)
+        protected void ThenAConcreteTestInstanceIsProvided(
+            object result,
+            Type expectedType)
         {
             result.ShouldSatisfyAllConditions(
                 () => result.ShouldNotBeNull(),
-                () => result.ShouldBeOfType<TTestInstance>()
+                () => result.ShouldBeOfType(expectedType)
             );
         }
     }
