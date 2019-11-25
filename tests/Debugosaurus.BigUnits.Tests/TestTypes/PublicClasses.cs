@@ -18,6 +18,27 @@ namespace Debugosaurus.BigUnits.Tests.TestTypes
         public PublicClassWithMultipleConstructorDependencies(object dependency1, object dependency2, object dependency3) {}
     }
 
+    public class PublicClassWithNestedPublicClasses
+    {
+        public class PublicClassWithDefaultConstructor
+        {}
+
+        public class PublicClassWithZeroArgConstructor
+        {
+            public PublicClassWithZeroArgConstructor() {}
+        }    
+
+        public class PublicClassWithASingleConstructorDependency
+        {
+            public PublicClassWithASingleConstructorDependency(object dependency) {}
+        }     
+
+        public class PublicClassWithMultipleConstructorDependencies
+        {
+            public PublicClassWithMultipleConstructorDependencies(object dependency1, object dependency2, object dependency3) {}
+        }
+    }
+
     public class PublicClasses
     {
         public static System.Collections.Generic.IEnumerable<object[]> Data =>
@@ -26,7 +47,13 @@ namespace Debugosaurus.BigUnits.Tests.TestTypes
                 new object[] { typeof(PublicClassWithDefaultConstructor) },
                 new object[] { typeof(PublicClassWithZeroArgConstructor) },
                 new object[] { typeof(PublicClassWithASingleConstructorDependency) },
-                new object[] { typeof(PublicClassWithMultipleConstructorDependencies) }
+                new object[] { typeof(PublicClassWithMultipleConstructorDependencies) },
+
+                new object[] { typeof(PublicClassWithNestedPublicClasses.PublicClassWithDefaultConstructor) },
+                new object[] { typeof(PublicClassWithNestedPublicClasses.PublicClassWithZeroArgConstructor) },
+                new object[] { typeof(PublicClassWithNestedPublicClasses.PublicClassWithASingleConstructorDependency) },
+                new object[] { typeof(PublicClassWithNestedPublicClasses.PublicClassWithMultipleConstructorDependencies) }
+
             };
     } 
 }
