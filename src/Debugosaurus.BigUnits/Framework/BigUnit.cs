@@ -9,7 +9,7 @@ namespace Debugosaurus.BigUnits.Framework
 
         public BigUnit(
             ITestScope testScope,
-            ITestInstanceProvider testInstanceProvider) {
+            TestInstanceProvider testInstanceProvider) {
 
             TestScope = testScope;
             TestInstanceProvider = testInstanceProvider;
@@ -34,7 +34,7 @@ namespace Debugosaurus.BigUnits.Framework
             return result;
         }        
 
-        public ITestInstanceProvider TestInstanceProvider
+        public TestInstanceProvider TestInstanceProvider
         {
             get; set;
         }

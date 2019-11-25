@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Debugosaurus.BigUnits.Framework
 {
-    public class TestInstanceProvider : ITestInstanceProvider
+    public class TestInstanceProvider
     {
         private readonly ITestScope testScope;
 
