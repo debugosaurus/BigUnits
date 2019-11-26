@@ -10,12 +10,29 @@ namespace Debugosaurus.BigUnits.Tests.TestTypes
 
     public class PublicClassWithASingleConstructorDependency
     {
-        public PublicClassWithASingleConstructorDependency(object dependency) {}
+        private IDependency dependency;
+        
+        public PublicClassWithASingleConstructorDependency(IDependency dependency) 
+        {
+            this.dependency = dependency;
+        }
     }     
 
     public class PublicClassWithMultipleConstructorDependencies
     {
-        public PublicClassWithMultipleConstructorDependencies(object dependency1, object dependency2, object dependency3) {}
+        private IDependency<object> dependency1;
+        private IDependency<string> dependency2;
+        private IDependency<int> dependency3;
+
+        public PublicClassWithMultipleConstructorDependencies(
+            IDependency<object> dependency1, 
+            IDependency<string> dependency2, 
+            IDependency<int> dependency3) 
+        {
+            this.dependency1 = dependency1;
+            this.dependency2 = dependency2;
+            this.dependency3 = dependency3;
+        }
     }
 
     public class PublicClassWithNestedPublicClasses
@@ -30,12 +47,29 @@ namespace Debugosaurus.BigUnits.Tests.TestTypes
 
         public class PublicClassWithASingleConstructorDependency
         {
-            public PublicClassWithASingleConstructorDependency(object dependency) {}
+            private IDependency dependency;
+
+            public PublicClassWithASingleConstructorDependency(IDependency dependency) 
+            {
+                this.dependency = dependency;
+            }
         }     
 
         public class PublicClassWithMultipleConstructorDependencies
         {
-            public PublicClassWithMultipleConstructorDependencies(object dependency1, object dependency2, object dependency3) {}
+            private IDependency<object> dependency1;
+            private IDependency<string> dependency2;
+            private IDependency<int> dependency3;
+
+            public PublicClassWithMultipleConstructorDependencies(
+                IDependency<object> dependency1, 
+                IDependency<string> dependency2, 
+                IDependency<int> dependency3) 
+            {
+                this.dependency1 = dependency1;
+                this.dependency2 = dependency2;
+                this.dependency3 = dependency3;                
+            }
         }
     }
 
