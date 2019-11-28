@@ -44,6 +44,11 @@ namespace Debugosaurus.BigUnits.Framework
             TestInstanceProvider.SetDependency(dependency);
         }
 
+        public TDependency GetDependency<TDependency>()
+        {
+            return TestInstanceProvider.GetDependency<TDependency>();
+        }
+
         public ITestScope TestScope
         {
             get; set;
