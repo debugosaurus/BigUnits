@@ -1,92 +1,88 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Debugosaurus.BigUnits.Framework
 {
     public class TestInstanceProvider
     {
+        private readonly TypeCache typeCache;
+        
         private readonly ITestScope testScope;
 
         private readonly IConstructorStrategy constructorStrategy;
 
-        private readonly IDependencyProvider dependencyProvider;
-
-        private readonly IDictionary<Type,object> dependencies = new Dictionary<Type, object>();
+        private readonly IDependencyProvider fakeProvider;
 
         public TestInstanceProvider(
             ITestScope testScope,
             IConstructorStrategy constructorStrategy,
-            IDependencyProvider dependencyProvider)
+            IDependencyProvider fakeProvider,
+            TypeCache typeCache)
         {
             this.testScope = testScope;
             this.constructorStrategy = constructorStrategy;
-            this.dependencyProvider = dependencyProvider;
+            this.fakeProvider = fakeProvider;
+            this.typeCache = typeCache;
         }
 
         public object CreateInstance(Type type)
         {
-            if(constructorStrategy == null)
+            if(typeCache.Contains(type))
             {
-                throw new Exception(string.Join(";",dependencies.Keys));
+                return typeCache[type];
             }
 
-            var constructor = constructorStrategy.GetConstructor(type);
+            object result;
 
-            if(constructor == null)
+            if(testScope.IsInScope(type))
             {
-                throw new Exception("Cannot construct " + type.FullName);
-            }
+                var targetType = type;
 
-            var args = constructor
-                .GetParameters()
-                .Select(x => GetConstructorArgument(x))
-                .ToArray();
-
-            return Activator.CreateInstance(
-                type, 
-                args);
-        }
-
-        private object GetConstructorArgument(System.Reflection.ParameterInfo parameterInfo)
-        {
-            if(dependencies.ContainsKey(parameterInfo.ParameterType))
-            {
-                return dependencies[parameterInfo.ParameterType];
-            }
-
-            if(testScope.IsInScope(parameterInfo.ParameterType)) 
-            {
-                if(!parameterInfo.ParameterType.IsInterface && !parameterInfo.ParameterType.IsAbstract)
+                if(type.IsAbstract || type.IsInterface)
                 {
-                    return CreateInstance(parameterInfo.ParameterType);
+                    var scopedImplementationType = testScope.GetTypesInScope()
+                        .Where(x => !x.IsAbstract && !x.IsInterface && type.IsAssignableFrom(x))
+                        .SingleOrDefault();
+                    if(scopedImplementationType != null)
+                    {
+                        targetType = scopedImplementationType;
+                    }
                 }
 
-                var scopedImplementationType = testScope.GetTypesInScope()
-                    .Where(x => !x.IsAbstract && !x.IsInterface && parameterInfo.ParameterType.IsAssignableFrom(x))
-                    .SingleOrDefault();
+                var constructorInfo = constructorStrategy.GetConstructor(targetType);
+                var constructorArgs = constructorInfo.GetParameters()
+                    .Select(x => CreateInstance(x.ParameterType))
+                    .ToArray();
 
-                if(scopedImplementationType != null) 
-                {
-                    return CreateInstance(scopedImplementationType);
-                }
+                result = constructorInfo.Invoke(constructorArgs);
+
+                typeCache.Add(
+                    type,
+                    result);
+                return result;
             }
-            
-            return dependencyProvider.GetDependency(parameterInfo.ParameterType);
+            else
+            {
+                result = fakeProvider.GetDependency(type);
+
+            }
+
+            typeCache.Add(
+                type,
+                result);
+            return result;           
         }
 
         public void SetDependency<TDependency>(TDependency dependency)
         {
-            dependencies.Add(typeof(TDependency),dependency);
+            typeCache.Add(
+                typeof(TDependency),
+                dependency);
         }
 
         public TDependency GetDependency<TDependency>()
         {
-            dependencies.TryGetValue(
-                typeof(TDependency),
-                out var result);
-
-            return (TDependency) result;
+            return (TDependency) typeCache[typeof(TDependency)];
         }
     }
 }
