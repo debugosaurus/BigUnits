@@ -46,7 +46,8 @@ namespace Debugosaurus.BigUnits.Framework
                     new TestInstanceProvider(
                         testScope,
                         constructorStrategy,
-                        dependencyProvider
+                        dependencyProvider,
+                        new TypeCache()
                     )
                 );
             }

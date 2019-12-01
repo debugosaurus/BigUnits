@@ -49,7 +49,7 @@ namespace Debugosaurus.BigUnits.Tests.Framework
                 out var secondResult);
 
             secondResult.ShouldBe(firstResult);
-        }
+        }     
 
         protected void GivenTheDependencyProviderIs(IDependencyProvider dependencyProvider)
         {
