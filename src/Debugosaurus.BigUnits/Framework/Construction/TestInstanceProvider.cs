@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Debugosaurus.BigUnits.Exceptions;
 
-namespace Debugosaurus.BigUnits.Framework
+namespace Debugosaurus.BigUnits.Framework.Construction
 {
     public class TestInstanceProvider
     {

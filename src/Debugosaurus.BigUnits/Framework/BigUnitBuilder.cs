@@ -1,3 +1,6 @@
+using Debugosaurus.BigUnits.Framework.Scopes;
+using Debugosaurus.BigUnits.Framework.Construction;
+
 namespace Debugosaurus.BigUnits.Framework
 {
     public class BigUnitBuilder

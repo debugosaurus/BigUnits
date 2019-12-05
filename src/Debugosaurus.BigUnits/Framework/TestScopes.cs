@@ -1,4 +1,5 @@
 using System;
+using Debugosaurus.BigUnits.Framework.Scopes;
 
 namespace Debugosaurus.BigUnits.Framework
 {
@@ -16,12 +17,7 @@ namespace Debugosaurus.BigUnits.Framework
 
         public static ITestScope Namespace<T>()
         {
-            return Namespace(typeof(T));
+            return new NamespaceScope(typeof(T));
         }  
-
-        public static ITestScope Namespace(Type type)
-        {
-            return new NamespaceScope(type.Namespace);
-        }
     }
 }

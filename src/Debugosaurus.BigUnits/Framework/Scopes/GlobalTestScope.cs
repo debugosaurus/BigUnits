@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace Debugosaurus.BigUnits.Framework
+namespace Debugosaurus.BigUnits.Framework.Scopes
 {
     public class GlobalTestScope : ITestScope
     {

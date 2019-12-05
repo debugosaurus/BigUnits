@@ -1,6 +1,6 @@
 using System;
 
-namespace Debugosaurus.BigUnits.Framework
+namespace Debugosaurus.BigUnits.Framework.Construction
 {
     public interface IBuildAction
     {
