@@ -78,14 +78,26 @@ namespace Debugosaurus.BigUnits.Tests.Framework
         }
 
         [Fact]
-        public void SettingADependencyWhenTheCurrentScopeHasNoDependenciesCausesAnError()
+        public void RequestingADependencyWhenTheDependencyIsNotValidInTheCurrentScopeCausesAnError()
         {
-            GivenTheTestScopeIs(TestScopes.Class<PublicClassWithDefaultConstructor>());
+            GivenTheTestScopeIs(TestScopes.Class<PublicClassWithASingleConstructorDependency>());
             GivenTheDependencyProviderIs(new FakeDependencyProvider());
 
-            Action action = () => TestInstance.SetDependency(new object());
+            Action action = () => TestInstance.GetDependency<RankException>();
             var exception = action.ShouldThrow<BigUnitsException>();
-            exception.Data["DependencyType"].ShouldBe(typeof(object));
+            exception.Data["DependencyType"].ShouldBe(typeof(RankException));
+        }
+
+
+        [Fact]
+        public void SettingADependencyWhenTheDependencyIsNotValidInTheCurrentScopeCausesAnError()
+        {
+            GivenTheTestScopeIs(TestScopes.Class<PublicClassWithASingleConstructorDependency>());
+            GivenTheDependencyProviderIs(new FakeDependencyProvider());
+
+            Action action = () => TestInstance.SetDependency(new RankException());
+            var exception = action.ShouldThrow<BigUnitsException>();
+            exception.Data["DependencyType"].ShouldBe(typeof(RankException));
         }
 
         protected void GivenTheDependencyProviderIs(IDependencyProvider dependencyProvider)
