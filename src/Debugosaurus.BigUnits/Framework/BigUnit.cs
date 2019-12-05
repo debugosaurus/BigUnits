@@ -41,10 +41,24 @@ namespace Debugosaurus.BigUnits.Framework
 
         public void SetDependency<TDependency>(TDependency dependency)
         {
+            CheckDependency(typeof(TDependency));
+
             TestInstanceProvider.SetDependency(dependency);
         }
 
         public TDependency GetDependency<TDependency>()
+        {
+            CheckDependency(typeof(TDependency));
+
+            return TestInstanceProvider.GetDependency<TDependency>();
+        }
+
+        public ITestScope TestScope
+        {
+            get; set;
+        }
+
+        private void CheckDependency(Type type)
         {
             var dependencyTypes = new HashSet<Type>();
             var typesInScope = TestScope.GetTypesInScope();
@@ -57,20 +71,13 @@ namespace Debugosaurus.BigUnits.Framework
                 }
             }
 
-            var matchingTypes = dependencyTypes.Where(x => typeof(TDependency).IsAssignableFrom(x));
+            var matchingTypes = dependencyTypes.Where(x => type.IsAssignableFrom(x));
             if(!matchingTypes.Any())
             {
                 throw new BigUnitsException(
                     ExceptionMessages.NotAValidDependencyType,
-                    ("DependencyType", typeof(TDependency)));
-            }
-
-            return TestInstanceProvider.GetDependency<TDependency>();
-        }
-
-        public ITestScope TestScope
-        {
-            get; set;
+                    ("DependencyType", type));
+            }            
         }
     }
 }
