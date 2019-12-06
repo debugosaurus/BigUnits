@@ -1,6 +1,6 @@
 using Debugosaurus.BigUnits.Exceptions;
 using Debugosaurus.BigUnits.Tests.Fakes;
-using Debugosaurus.BigUnits.Tests.TestTypes;
+using Debugosaurus.BigUnits.Tests.Fakes.PublicClasses;
 using Debugosaurus.BigUnits.Framework;
 using Debugosaurus.BigUnits.Framework.Scopes;
 using Xunit;
@@ -13,41 +13,39 @@ namespace Debugosaurus.BigUnits.Tests.Framework
 {
     public class BigUnitTests : IntegrationTest<BigUnit>
     {
-        [Theory]
-        [MemberData(nameof(PublicClasses.Data), MemberType=typeof(PublicClasses))]
-        public void ClassScopeCanProvideTestInstancesForConcreteClasses(Type testInstanceType)
+        [Fact]
+        public void ClassScopeCanProvideTestInstancesForConcreteClasses()
         {
-            GivenTheTestScopeIs(TestScopes.Class(testInstanceType));
+            GivenTheTestScopeIs(TestScopes.Class<PublicClassWithMultipleConstructorDependencies>());
             
             GivenTheDependencyProviderIs(new FakeDependencyProvider());
 
             WhenATestInstanceIsRequested(
-                testInstanceType,
+                typeof(PublicClassWithMultipleConstructorDependencies),
                 out var result);
 
             ThenAConcreteTestInstanceIsProvided(
                 result,
-                testInstanceType);
+                typeof(PublicClassWithMultipleConstructorDependencies));
 
             ThenAllDependenciesAreMocked(
                 result,
-                testInstanceType);
+                typeof(PublicClassWithMultipleConstructorDependencies));
         }
 
-        [Theory]
-        [MemberData(nameof(PublicClasses.Data), MemberType=typeof(PublicClasses))]
-        public void SameTestInstanceIsRetrievedEachTimeItIsRequested(Type testInstanceType)
+        [Fact]
+        public void SameTestInstanceIsRetrievedEachTimeItIsRequested()
         {
-            GivenTheTestScopeIs(TestScopes.Class(testInstanceType));
+            GivenTheTestScopeIs(TestScopes.Class<PublicClassWithDefaultConstructor>());
             
             GivenTheDependencyProviderIs(new FakeDependencyProvider());
 
             WhenATestInstanceIsRequested(
-                testInstanceType,
+                typeof(PublicClassWithDefaultConstructor),
                 out var firstResult);
 
             WhenATestInstanceIsRequested(
-                testInstanceType,
+                typeof(PublicClassWithDefaultConstructor),
                 out var secondResult);
 
             secondResult.ShouldBe(firstResult);
