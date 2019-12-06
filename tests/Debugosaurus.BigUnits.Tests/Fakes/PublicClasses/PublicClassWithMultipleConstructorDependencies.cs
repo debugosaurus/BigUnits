@@ -4,18 +4,18 @@ namespace Debugosaurus.BigUnits.Tests.Fakes.PublicClasses
 {
     public class PublicClassWithMultipleConstructorDependencies
     {
-        private IDependency<object> dependency1;
-        private IDependency<string> dependency2;
-        private IDependency<int> dependency3;
+        public IDependency<object> Dependency1 { get; }
+        public IDependency<string> Dependency2 { get; }
+        public IDependency<int> Dependency3 { get; }
 
         public PublicClassWithMultipleConstructorDependencies(
             IDependency<object> dependency1, 
             IDependency<string> dependency2, 
             IDependency<int> dependency3) 
         {
-            this.dependency1 = dependency1;
-            this.dependency2 = dependency2;
-            this.dependency3 = dependency3;
+            Dependency1 = dependency1;
+            Dependency2 = dependency2;
+            Dependency3 = dependency3;
         }
     }
 }
