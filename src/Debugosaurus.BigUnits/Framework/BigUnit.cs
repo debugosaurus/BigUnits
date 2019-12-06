@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Debugosaurus.BigUnits.Exceptions;
 
 namespace Debugosaurus.BigUnits.Framework
 {
@@ -22,6 +23,13 @@ namespace Debugosaurus.BigUnits.Framework
 
         public object GetTestInstance(Type testInstanceType)
         {
+            if(!TestScope.IsInScope(testInstanceType))
+            {
+                throw new BigUnitsException(
+                    ExceptionMessages.TestInstanceNotInScope,
+                    ("TestInstanceType" , testInstanceType));
+            }
+
             if(testInstances.ContainsKey(testInstanceType))
             {
                 return testInstances[testInstanceType];

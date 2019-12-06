@@ -51,6 +51,20 @@ namespace Debugosaurus.BigUnits.Tests.Framework
             secondResult.ShouldBe(firstResult);
         }     
 
+        [Fact]
+        public void RequestingATestInstanceOutsideOfScopeCausesAnError()
+        {
+            GivenTheTestScopeIs(TestScopes.Class<PublicClassWithDefaultConstructor>());
+            GivenTheDependencyProviderIs(new FakeDependencyProvider());
+
+            Action action  = () => WhenATestInstanceIsRequested(
+                typeof(object),
+                out _);
+
+            var exception = action.ShouldThrow<Exception>();
+            exception.Data["TestInstanceType"].ShouldBe(typeof(object));
+        }
+
         protected void GivenTheDependencyProviderIs(IDependencyProvider dependencyProvider)
         {
             SetDependency(dependencyProvider);
