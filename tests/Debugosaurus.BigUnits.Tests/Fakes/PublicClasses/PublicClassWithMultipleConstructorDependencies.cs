@@ -1,5 +1,3 @@
-using Debugosaurus.BigUnits.Tests.Fakes;
-
 namespace Debugosaurus.BigUnits.Tests.Fakes.PublicClasses
 {
     public class PublicClassWithMultipleConstructorDependencies

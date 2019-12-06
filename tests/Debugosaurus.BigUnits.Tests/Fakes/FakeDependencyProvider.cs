@@ -1,24 +1,25 @@
 using System;
-using System.Collections.Generic;
 using Debugosaurus.BigUnits.Framework;
 
 namespace Debugosaurus.BigUnits.Tests.Fakes
-{    
+{
     public class FakeDependencyProvider : IDependencyProvider
     {
-        public IDictionary<Type, object> Audit = new Dictionary<Type, object>();
+        private readonly TypeCache typeCache = new TypeCache();
 
         public object GetDependency(Type type)
         {
-            if(Audit.ContainsKey(type))
+            if(typeCache.Contains(type))
             {
-                return Audit[type];
+                return typeCache[type];
             }
 
             if(type == typeof(IDependency))
             {
                 var result = new FakeDependency();
-                Audit[type] = result;
+                typeCache.Add(
+                    type, 
+                    result);
                 return result;
             }
             else if(type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IDependency<>))
@@ -28,7 +29,9 @@ namespace Debugosaurus.BigUnits.Tests.Fakes
 
                 var result = Activator.CreateInstance(fakeDependencyType);
 
-                Audit[type] = result;
+                typeCache.Add(
+                    type,
+                    result);
 
                 return result;
             }
