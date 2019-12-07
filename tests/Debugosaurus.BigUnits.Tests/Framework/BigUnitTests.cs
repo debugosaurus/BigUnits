@@ -77,6 +77,17 @@ namespace Debugosaurus.BigUnits.Tests.Framework
             exception.Data["DependencyType"].ShouldBe(typeof(object));
         }
 
+        [Fact]
+        public void SettingADependencyWhenTheCurrentScopeHasNoDependenciesCausesAnError()
+        {
+            GivenTheTestScopeIs(TestScopes.Class<PublicClassWithDefaultConstructor>());
+            GivenTheDependencyProviderIs(new FakeDependencyProvider());
+
+            Action action = () => TestInstance.SetDependency(new object());
+            var exception = action.ShouldThrow<BigUnitsException>();
+            exception.Data["DependencyType"].ShouldBe(typeof(object));
+        }
+
         protected void GivenTheDependencyProviderIs(IDependencyProvider dependencyProvider)
         {
             SetDependency(dependencyProvider);
