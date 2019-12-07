@@ -1,6 +1,10 @@
 using System;
 using Debugosaurus.BigUnits.Exceptions;
 
+using System.Collections.Generic;
+using System.Reflection;
+using System.Linq;
+
 namespace Debugosaurus.BigUnits.Framework
 {
     public class BigUnit
@@ -42,6 +46,25 @@ namespace Debugosaurus.BigUnits.Framework
 
         public TDependency GetDependency<TDependency>()
         {
+            var dependencyTypes = new HashSet<Type>();
+            var typesInScope = TestScope.GetTypesInScope();
+            foreach(var typeInScope in typesInScope.Where(x => !x.IsInterface && !x.IsAbstract))
+            {
+                var constructor = new GreedyConstructorStrategy().GetConstructor(typeInScope);
+                foreach(var parameter in constructor.GetParameters())
+                {
+                    dependencyTypes.Add(parameter.ParameterType);
+                }
+            }
+
+            var matchingTypes = dependencyTypes.Where(x => typeof(TDependency).IsAssignableFrom(x));
+            if(!matchingTypes.Any())
+            {
+                throw new BigUnitsException(
+                    ExceptionMessages.NotAValidDependencyType,
+                    ("DependencyType", typeof(TDependency)));
+            }
+
             return TestInstanceProvider.GetDependency<TDependency>();
         }
 

@@ -1,3 +1,4 @@
+using Debugosaurus.BigUnits.Exceptions;
 using Debugosaurus.BigUnits.Tests.Fakes;
 using Debugosaurus.BigUnits.Tests.TestTypes;
 using Debugosaurus.BigUnits.Framework;
@@ -61,8 +62,19 @@ namespace Debugosaurus.BigUnits.Tests.Framework
                 typeof(object),
                 out _);
 
-            var exception = action.ShouldThrow<Exception>();
+            var exception = action.ShouldThrow<BigUnitsException>();
             exception.Data["TestInstanceType"].ShouldBe(typeof(object));
+        }
+
+        [Fact]
+        public void RequestingADependencyWhenTheCurrentScopeHasNoDependenciesCausesAnError()
+        {
+            GivenTheTestScopeIs(TestScopes.Class<PublicClassWithDefaultConstructor>());
+            GivenTheDependencyProviderIs(new FakeDependencyProvider());
+
+            Action action = () => TestInstance.GetDependency<object>();
+            var exception = action.ShouldThrow<BigUnitsException>();
+            exception.Data["DependencyType"].ShouldBe(typeof(object));
         }
 
         protected void GivenTheDependencyProviderIs(IDependencyProvider dependencyProvider)
