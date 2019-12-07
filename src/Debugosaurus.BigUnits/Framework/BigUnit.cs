@@ -1,9 +1,6 @@
 using System;
-using Debugosaurus.BigUnits.Exceptions;
-
-using System.Collections.Generic;
-using System.Reflection;
 using System.Linq;
+using Debugosaurus.BigUnits.Exceptions;
 
 namespace Debugosaurus.BigUnits.Framework
 {
@@ -11,9 +8,11 @@ namespace Debugosaurus.BigUnits.Framework
     {
         public BigUnit(
             ITestScope testScope,
+            TestInstanceStrategy testInstanceStrategy,
             TestInstanceProvider testInstanceProvider) {
 
             TestScope = testScope;
+            TestInstanceStrategy = testInstanceStrategy;
             TestInstanceProvider = testInstanceProvider;
         }
 
@@ -24,14 +23,17 @@ namespace Debugosaurus.BigUnits.Framework
 
         public object GetTestInstance(Type testInstanceType)
         {
-            if(!TestScope.IsInScope(testInstanceType))
+            var buildAction = TestInstanceStrategy.GetBuildAction(testInstanceType);
+            if(buildAction == null)
             {
                 throw new BigUnitsException(
                     ExceptionMessages.TestInstanceNotInScope,
-                    ("TestInstanceType" , testInstanceType));
+                    ("TestInstanceType" , testInstanceType));            
             }
             
-            return TestInstanceProvider.CreateInstance(testInstanceType);
+            return TestInstanceProvider.CreateInstance(
+                testInstanceType, 
+                TestInstanceStrategy);
         }        
 
         public TestInstanceProvider TestInstanceProvider
@@ -39,45 +41,52 @@ namespace Debugosaurus.BigUnits.Framework
             get; set;
         }
 
-        public void SetDependency<TDependency>(TDependency dependency)
+        public TestInstanceStrategy TestInstanceStrategy
         {
-            CheckDependency(typeof(TDependency));
+            get; set;
+        }
 
+        public void SetDependency<TDependency>(TDependency dependency)
+        {            
+            var buildActions = TestInstanceStrategy.GetBuildActionsInScope();
+            var dependencies = buildActions
+                .Where(x => x != null)
+                .SelectMany(x => x.GetDependencyTypes())
+                .Distinct()
+                .Where(x => typeof(TDependency).IsAssignableFrom(x));
+
+            if(!dependencies.Any())
+            {
+                throw new BigUnitsException(
+                    ExceptionMessages.NotAValidDependencyType,
+                    ("DependencyType", typeof(TDependency)));
+            }
+            
             TestInstanceProvider.SetDependency(dependency);
         }
 
         public TDependency GetDependency<TDependency>()
         {
-            CheckDependency(typeof(TDependency));
+            var buildActions = TestInstanceStrategy.GetBuildActionsInScope();
+            var dependencies = buildActions
+                .Where(x => x != null)
+                .SelectMany(x => x.GetDependencyTypes())
+                .Distinct()
+                .Where(x => typeof(TDependency).IsAssignableFrom(x));
 
+            if(!dependencies.Any())
+            {
+                throw new BigUnitsException(
+                    ExceptionMessages.NotAValidDependencyType,
+                    ("DependencyType", typeof(TDependency)));
+            }
+            
             return TestInstanceProvider.GetDependency<TDependency>();
         }
 
         public ITestScope TestScope
         {
             get; set;
-        }
-
-        private void CheckDependency(Type type)
-        {
-            var dependencyTypes = new HashSet<Type>();
-            var typesInScope = TestScope.GetTypesInScope();
-            foreach(var typeInScope in typesInScope.Where(x => !x.IsInterface && !x.IsAbstract))
-            {
-                var constructor = new GreedyConstructorStrategy().GetConstructor(typeInScope);
-                foreach(var parameter in constructor.GetParameters())
-                {
-                    dependencyTypes.Add(parameter.ParameterType);
-                }
-            }
-
-            var matchingTypes = dependencyTypes.Where(x => type.IsAssignableFrom(x));
-            if(!matchingTypes.Any())
-            {
-                throw new BigUnitsException(
-                    ExceptionMessages.NotAValidDependencyType,
-                    ("DependencyType", type));
-            }            
         }
     }
 }

@@ -43,9 +43,10 @@ namespace Debugosaurus.BigUnits.Framework
             {
                 bigUnit = new BigUnit(
                     testScope,
-                    new TestInstanceProvider(
+                    new TestInstanceStrategy(
                         testScope,
-                        constructorStrategy,
+                        constructorStrategy),
+                    new TestInstanceProvider(
                         dependencyProvider,
                         new TypeCache()
                     )

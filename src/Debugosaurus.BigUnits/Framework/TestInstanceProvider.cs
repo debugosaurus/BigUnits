@@ -1,31 +1,28 @@
 using System;
 using System.Linq;
+using System.Collections.Generic;
+using System.Reflection;
+using Debugosaurus.BigUnits.Exceptions;
 
 namespace Debugosaurus.BigUnits.Framework
 {
     public class TestInstanceProvider
     {
         private readonly TypeCache typeCache;
-        
-        private readonly ITestScope testScope;
-
-        private readonly IConstructorStrategy constructorStrategy;
 
         private readonly IDependencyProvider fakeProvider;
 
         public TestInstanceProvider(
-            ITestScope testScope,
-            IConstructorStrategy constructorStrategy,
             IDependencyProvider fakeProvider,
             TypeCache typeCache)
         {
-            this.testScope = testScope;
-            this.constructorStrategy = constructorStrategy;
             this.fakeProvider = fakeProvider;
             this.typeCache = typeCache;
         }
 
-        public object CreateInstance(Type type)
+        public object CreateInstance(
+            Type type,
+            TestInstanceStrategy strategy)
         {
             if(typeCache.Contains(type))
             {
@@ -34,43 +31,24 @@ namespace Debugosaurus.BigUnits.Framework
 
             object result;
 
-            if(testScope.IsInScope(type))
+            var buildAction = strategy.GetBuildAction(type);
+            if(buildAction == null)
             {
-                var targetType = type;
-
-                if(type.IsAbstract || type.IsInterface)
-                {
-                    var scopedImplementationType = testScope.GetTypesInScope()
-                        .Where(x => !x.IsAbstract && !x.IsInterface && type.IsAssignableFrom(x))
-                        .SingleOrDefault();
-                    if(scopedImplementationType != null)
-                    {
-                        targetType = scopedImplementationType;
-                    }
-                }
-
-                var constructorInfo = constructorStrategy.GetConstructor(targetType);
-                var constructorArgs = constructorInfo.GetParameters()
-                    .Select(x => CreateInstance(x.ParameterType))
-                    .ToArray();
-
-                result = constructorInfo.Invoke(constructorArgs);
-
-                typeCache.Add(
-                    type,
-                    result);
-                return result;
+                result = fakeProvider.GetDependency(type);
             }
             else
             {
-                result = fakeProvider.GetDependency(type);
-
+                var dependencies = buildAction.GetDependencyTypes();
+                var parameters = dependencies
+                    .Select(x => CreateInstance(x, strategy))
+                    .ToArray();
+                result = buildAction.Build(parameters);
             }
 
             typeCache.Add(
                 type,
                 result);
-            return result;           
+            return result;   
         }
 
         public void SetDependency<TDependency>(TDependency dependency)
