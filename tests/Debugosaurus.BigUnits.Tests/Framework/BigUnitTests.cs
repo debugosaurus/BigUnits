@@ -2,6 +2,7 @@ using Debugosaurus.BigUnits.Exceptions;
 using Debugosaurus.BigUnits.Tests.Fakes;
 using Debugosaurus.BigUnits.Tests.TestTypes;
 using Debugosaurus.BigUnits.Framework;
+using Debugosaurus.BigUnits.Framework.Scopes;
 using Xunit;
 using Shouldly;
 using System;

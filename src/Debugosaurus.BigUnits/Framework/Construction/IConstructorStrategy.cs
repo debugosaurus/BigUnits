@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace Debugosaurus.BigUnits.Framework
+namespace Debugosaurus.BigUnits.Framework.Construction
 {
     public interface IConstructorStrategy
     {

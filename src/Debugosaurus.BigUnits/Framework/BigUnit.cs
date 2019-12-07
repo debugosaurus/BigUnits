@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using Debugosaurus.BigUnits.Exceptions;
+using Debugosaurus.BigUnits.Framework.Scopes;
+using Debugosaurus.BigUnits.Framework.Construction;
 
 namespace Debugosaurus.BigUnits.Framework
 {

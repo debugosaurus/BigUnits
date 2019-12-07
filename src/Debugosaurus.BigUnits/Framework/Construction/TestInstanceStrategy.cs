@@ -1,8 +1,9 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Debugosaurus.BigUnits.Framework.Scopes;
 
-namespace Debugosaurus.BigUnits.Framework
+namespace Debugosaurus.BigUnits.Framework.Construction
 {
     public class TestInstanceStrategy
     {

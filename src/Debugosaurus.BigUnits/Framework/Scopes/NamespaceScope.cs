@@ -1,19 +1,19 @@
 using System;
 using System.Linq;
 
-namespace Debugosaurus.BigUnits.Framework
+namespace Debugosaurus.BigUnits.Framework.Scopes
 {
     public class NamespaceScope : ITestScope
     {
-        private readonly string @namespace;
+        private readonly Type type;
 
         private static Type[] typesInScope;
 
         private static readonly object SyncObj = new object();
 
-        public NamespaceScope(string @namespace)
+        public NamespaceScope(Type type)
         {
-            this.@namespace = @namespace;
+            this.type = type;
         }
 
         public Type[] GetTypesInScope()
@@ -24,10 +24,9 @@ namespace Debugosaurus.BigUnits.Framework
                 {
                     if(typesInScope == null)
                     {
-                        typesInScope = AppDomain.CurrentDomain
-                            .GetAssemblies()
-                            .SelectMany(x => x.GetTypes())
-                            .Where(x => x.Namespace == @namespace)
+                        typesInScope = type.Assembly
+                            .GetTypes()
+                            .Where(x => MatchesNamespace(type, x))
                             .ToArray();
                     }
                 }
@@ -38,7 +37,16 @@ namespace Debugosaurus.BigUnits.Framework
 
         public bool IsInScope(Type type)
         {
-            return type.Namespace == @namespace;
+            return MatchesNamespace(
+                this.type, 
+                type);
+        }
+
+        private static bool MatchesNamespace(Type x, Type y)
+        {
+            return
+                x.Namespace == y.Namespace ||
+                y.Namespace.StartsWith(x.Namespace + ".");
         }
     }
 }

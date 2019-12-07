@@ -2,7 +2,7 @@ using System;
 using System.Reflection;
 using System.Linq;
 
-namespace Debugosaurus.BigUnits.Framework
+namespace Debugosaurus.BigUnits.Framework.Construction
 {
     public class ConstructorBuildAction : IBuildAction
     {
