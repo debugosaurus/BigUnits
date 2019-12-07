@@ -1,13 +1,10 @@
 using System;
-using System.Collections.Generic;
 using Debugosaurus.BigUnits.Exceptions;
 
 namespace Debugosaurus.BigUnits.Framework
 {
     public class BigUnit
     {
-        private readonly IDictionary<Type, object> testInstances = new Dictionary<Type, object>();
-
         public BigUnit(
             ITestScope testScope,
             TestInstanceProvider testInstanceProvider) {
@@ -29,17 +26,8 @@ namespace Debugosaurus.BigUnits.Framework
                     ExceptionMessages.TestInstanceNotInScope,
                     ("TestInstanceType" , testInstanceType));
             }
-
-            if(testInstances.ContainsKey(testInstanceType))
-            {
-                return testInstances[testInstanceType];
-            }
             
-            var result = TestInstanceProvider.CreateInstance(testInstanceType);
-            testInstances.Add(
-                testInstanceType,
-                result);
-            return result;
+            return TestInstanceProvider.CreateInstance(testInstanceType);
         }        
 
         public TestInstanceProvider TestInstanceProvider
