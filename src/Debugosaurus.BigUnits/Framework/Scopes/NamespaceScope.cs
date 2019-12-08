@@ -5,9 +5,9 @@ namespace Debugosaurus.BigUnits.Framework.Scopes
 {
     public class NamespaceScope : ITestScope
     {
-        private static volatile Type[] _typesInScope;
+        private volatile Type[] _typesInScope;
 
-        private static readonly object SyncObj = new object();
+        private readonly object SyncObj = new object();
         private readonly Type _type;
 
         public NamespaceScope(Type type)
@@ -28,7 +28,7 @@ namespace Debugosaurus.BigUnits.Framework.Scopes
                 {
                     _typesInScope = _type.Assembly
                         .GetTypes()
-                        .Where(x => MatchesNamespace(_type, x))
+                        .Where(MatchesNamespace)
                         .ToArray();
                 }
             }
@@ -38,18 +38,14 @@ namespace Debugosaurus.BigUnits.Framework.Scopes
 
         public bool IsInScope(Type type)
         {
-            return MatchesNamespace(
-                _type,
-                type);
+            return MatchesNamespace(type);
         }
 
-        private static bool MatchesNamespace(
-            Type x,
-            Type y)
+        private bool MatchesNamespace(Type type)
         {
             return
-                x.Namespace == y.Namespace ||
-                y.Namespace.StartsWith(x.Namespace + ".");
+                type.Namespace == _type.Namespace ||
+                (type.Namespace != null && type.Namespace.StartsWith(_type.Namespace + "."));
         }
     }
 }
