@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Debugosaurus.BigUnits.Framework;
-using Debugosaurus.BigUnits.Tests.TestTypes;
 
 namespace Debugosaurus.BigUnits.Tests.Fakes
 {    
