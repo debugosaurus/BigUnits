@@ -48,7 +48,9 @@ namespace Debugosaurus.BigUnits.Framework.Construction
                 }
 
                 var constructor = _constructorStrategy.GetConstructor(targetType);
-                result = new ConstructorBuildAction(constructor);
+                result = new ConstructorBuildAction(
+                    type,
+                    constructor);
             }
 
             _cache.Add(type, result);
