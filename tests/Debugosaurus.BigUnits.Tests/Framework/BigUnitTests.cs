@@ -11,31 +11,27 @@ namespace Debugosaurus.BigUnits.Tests.Framework
 {
     public class BigUnitTests : IntegrationTest<BigUnit>
     {
+        private IDependencyProvider FakeDependencyProvider => new FakeDependencyProvider();
+
         [Fact]
-        public void ClassScopeCanProvideTestInstancesForConcreteClasses()
+        public void CanCreatePopulatedTestInstances()
         {
-            GivenTheTestScopeIs(TestScopes.Class<PublicClassWithMultipleConstructorDependencies>());
-            GivenTheDependencyProviderIs(new FakeDependencyProvider());
+            GivenTheTestScopeIs(TestScopes.Class<PublicClassWithDefaultConstructor>());
+            GivenTheDependencyProviderIs(FakeDependencyProvider);
 
-            WhenATestInstanceIsRequested<PublicClassWithMultipleConstructorDependencies>(out var result);
+            WhenATestInstanceIsRequested<PublicClassWithDefaultConstructor>(out var result);
 
-            ThenAConcreteTestInstanceIsProvided(result);
-            ThenTheDependencyIsMocked(
-                result,
-                x => x.Dependency1);
-            ThenTheDependencyIsMocked(
-                result,
-                x => x.Dependency2);
-            ThenTheDependencyIsMocked(
-                result,
-                x => x.Dependency3);
+            result.ShouldSatisfyAllConditions(
+                () => result.ShouldNotBeNull(),
+                () => result.ShouldBeOfType<PublicClassWithDefaultConstructor>()
+            );
         }
 
         [Fact]
-        public void SameTestInstanceIsRetrievedEachTimeItIsRequested()
+        public void ProvidesTheSameTestInstanceEachTime()
         {
             GivenTheTestScopeIs(TestScopes.Class<PublicClassWithDefaultConstructor>());
-            GivenTheDependencyProviderIs(new FakeDependencyProvider());
+            GivenTheDependencyProviderIs(FakeDependencyProvider);
 
             WhenATestInstanceIsRequested<PublicClassWithDefaultConstructor>(out var firstResult);
             WhenATestInstanceIsRequested<PublicClassWithDefaultConstructor>(out var secondResult);
@@ -44,66 +40,91 @@ namespace Debugosaurus.BigUnits.Tests.Framework
         }
 
         [Fact]
-        public void RequestingATestInstanceOutsideOfScopeCausesAnError()
+        public void CanRetrieveTheDependenciesThatWereUsedToBuildTheTestInstance()
+        {
+            GivenTheTestScopeIs(TestScopes.Class<PublicClassWithMultipleConstructorDependencies>());
+            GivenTheDependencyProviderIs(FakeDependencyProvider);
+
+            WhenATestInstanceIsRequested<PublicClassWithMultipleConstructorDependencies>(out var result);
+
+            var dependency1 = TestInstance.GetDependency<IDependency<One>>();
+            var dependency2 = TestInstance.GetDependency<IDependency<Two>>();
+            var dependency3 = TestInstance.GetDependency<IDependency<Three>>();
+
+            result.ShouldSatisfyAllConditions(
+                () => result.Dependency1.ShouldBe(dependency1),
+                () => result.Dependency2.ShouldBe(dependency2),
+                () => result.Dependency3.ShouldBe(dependency3)
+            );
+        }
+
+        [Fact]
+        public void CanRetrieveTheDependenciesThatAreGoingToBeUsedToBuildTheTestInstance()
+        {
+            GivenTheTestScopeIs(TestScopes.Class<PublicClassWithMultipleConstructorDependencies>());
+            GivenTheDependencyProviderIs(FakeDependencyProvider);
+
+            var dependency1 = TestInstance.GetDependency<IDependency<One>>();
+            var dependency2 = TestInstance.GetDependency<IDependency<Two>>();
+            var dependency3 = TestInstance.GetDependency<IDependency<Three>>();
+
+            WhenATestInstanceIsRequested<PublicClassWithMultipleConstructorDependencies>(out var result);
+
+            result.ShouldSatisfyAllConditions(
+                () => result.Dependency1.ShouldBe(dependency1),
+                () => result.Dependency2.ShouldBe(dependency2),
+                () => result.Dependency3.ShouldBe(dependency3)
+            );
+        }
+
+        [Fact]
+        public void ThrowsAnExceptionWhenAskedForATestInstanceOutsideOfTheCurrentScope()
         {
             GivenTheTestScopeIs(TestScopes.Class<PublicClassWithDefaultConstructor>());
-            GivenTheDependencyProviderIs(new FakeDependencyProvider());
+            GivenTheDependencyProviderIs(FakeDependencyProvider);
 
-            Action action = () => WhenATestInstanceIsRequested<object>(out _);
-
-            var exception = action.ShouldThrow<BigUnitsException>();
-            exception.Data["TestInstanceType"].ShouldBe(typeof(object));
+            var exception = Should.Throw<BigUnitsException>(
+                () => WhenATestInstanceIsRequested<object>(out _));
+            exception.Data[ExceptionData.TestInstanceType].ShouldBe(typeof(object));
         }
 
         [Fact]
-        public void RequestingADependencyWhenTheCurrentScopeHasNoDependenciesCausesAnError()
+        public void ThrowsAnExceptionWhenAskedForADependencyWhereThereAreNoneInTheCurrentScope()
         {
             GivenTheTestScopeIs(TestScopes.Class<PublicClassWithDefaultConstructor>());
-            GivenTheDependencyProviderIs(new FakeDependencyProvider());
+            GivenTheDependencyProviderIs(FakeDependencyProvider);
 
-            Action action = () => TestInstance.GetDependency<object>();
-            var exception = action.ShouldThrow<BigUnitsException>();
-            exception.Data["DependencyType"].ShouldBe(typeof(object));
+            var exception = Should.Throw<BigUnitsException>(
+                () => TestInstance.GetDependency<object>());
+            exception.Data[ExceptionData.DependencyType].ShouldBe(typeof(object));
         }
 
         [Fact]
-        public void RequestingADependencyWhenTheDependencyIsNotValidInTheCurrentScopeCausesAnError()
+        public void ThrowsAnExceptionWhenAskedForADependencyOutsideOfTheCurrentScope()
         {
             GivenTheTestScopeIs(TestScopes.Class<PublicClassWithASingleConstructorDependency>());
-            GivenTheDependencyProviderIs(new FakeDependencyProvider());
+            GivenTheDependencyProviderIs(FakeDependencyProvider);
 
-            Action action = () => TestInstance.GetDependency<RankException>();
-            var exception = action.ShouldThrow<BigUnitsException>();
-            exception.Data["DependencyType"].ShouldBe(typeof(RankException));
+            var exception = Should.Throw<BigUnitsException>(
+                () => TestInstance.GetDependency<RankException>());
+            exception.Data[ExceptionData.DependencyType].ShouldBe(typeof(RankException));
         }
 
 
         [Fact]
-        public void SettingADependencyWhenTheDependencyIsNotValidInTheCurrentScopeCausesAnError()
+        public void ThrowsAnExceptionWhenAttemptingToSetADependencyOutsideOfTheCurrentScope()
         {
             GivenTheTestScopeIs(TestScopes.Class<PublicClassWithASingleConstructorDependency>());
-            GivenTheDependencyProviderIs(new FakeDependencyProvider());
+            GivenTheDependencyProviderIs(FakeDependencyProvider);
 
-            Action action = () => TestInstance.SetDependency(new RankException());
-            var exception = action.ShouldThrow<BigUnitsException>();
-            exception.Data["DependencyType"].ShouldBe(typeof(RankException));
+            var exception = Should.Throw<BigUnitsException>(
+                () => TestInstance.SetDependency(new RankException()));
+            exception.Data[ExceptionData.DependencyType].ShouldBe(typeof(RankException));
         }
 
         protected void GivenTheDependencyProviderIs(IDependencyProvider dependencyProvider)
         {
             SetDependency(dependencyProvider);
-        }
-
-        protected void ThenTheDependencyIsMocked<TResult, TDependency>(
-            TResult result,
-            Func<TResult, TDependency> dependency)
-        {
-            var dependencyProvider = GetDependency<IDependencyProvider>();
-
-            var expected = dependency(result);
-            var actual = dependencyProvider.GetDependency(typeof(TDependency));
-
-            actual.ShouldBe(expected);
         }
 
         protected void GivenTheTestScopeIs(ITestScope testScope)
@@ -114,14 +135,6 @@ namespace Debugosaurus.BigUnits.Tests.Framework
         protected void WhenATestInstanceIsRequested<TTestInstance>(out TTestInstance result)
         {
             result = TestInstance.GetTestInstance<TTestInstance>();
-        }
-
-        protected void ThenAConcreteTestInstanceIsProvided<TTestInstance>(TTestInstance testInstance)
-        {
-            testInstance.ShouldSatisfyAllConditions(
-                () => testInstance.ShouldNotBeNull(),
-                () => testInstance.GetType().ShouldBe(typeof(TTestInstance))
-            );
         }
     }
 }
