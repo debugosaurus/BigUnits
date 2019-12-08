@@ -13,11 +13,11 @@ namespace Debugosaurus.BigUnits.Framework
         public static ITestScope Class(Type type)
         {
             return new ClassTestScope(type);
-        }      
+        }
 
         public static ITestScope Namespace<T>()
         {
             return new NamespaceScope(typeof(T));
-        }  
+        }
     }
 }

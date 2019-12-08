@@ -4,28 +4,16 @@ namespace Debugosaurus.BigUnits.Tests
 {
     public abstract class UnitTest<T> where T : class
     {
-        private BigUnitBuilder bigUnitBuilder;
+        private BigUnitBuilder _bigUnitBuilder;
 
         protected UnitTest() 
         {
-            bigUnitBuilder = new BigUnitBuilder()
+            _bigUnitBuilder = new BigUnitBuilder()
                 .WithTestScope(TestScopes.Class<T>());
         }
 
-        private BigUnit BigUnit
-        {
-            get
-            {
-                return bigUnitBuilder.Build();
-            }
-        }
+        private BigUnit BigUnit => _bigUnitBuilder.Build();
 
-        protected T TestInstance
-        {
-            get
-            {
-                return BigUnit.GetTestInstance<T>();
-            }
-        }
+        protected T TestInstance => BigUnit.GetTestInstance<T>();
     }
 }

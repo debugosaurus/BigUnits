@@ -1,33 +1,28 @@
 using System;
-using System.Reflection;
 using System.Linq;
+using System.Reflection;
 
 namespace Debugosaurus.BigUnits.Framework.Construction
 {
     public class ConstructorBuildAction : IBuildAction
     {
-        private readonly Type type;
+        private readonly ConstructorInfo _constructor;
 
-        private readonly ConstructorInfo constructor;
-
-        public ConstructorBuildAction(
-            Type type,
-            ConstructorInfo constructor)
+        public ConstructorBuildAction(ConstructorInfo constructor)
         {
-            this.type = type;
-            this.constructor = constructor;
+            _constructor = constructor;
         }
 
         public Type[] GetDependencyTypes()
         {
-            return constructor.GetParameters()
+            return _constructor.GetParameters()
                 .Select(x => x.ParameterType)
                 .ToArray();
         }
 
         public object Build(params object[] parameters)
         {
-            return constructor.Invoke(parameters);
+            return _constructor.Invoke(parameters);
         }
     }
 }

@@ -5,19 +5,19 @@ namespace Debugosaurus.BigUnits.Tests.Fakes
 {
     public class FakeDependencyProvider : IDependencyProvider
     {
-        private readonly TypeCache typeCache = new TypeCache();
+        private readonly TypeCache _typeCache = new TypeCache();
 
         public object GetDependency(Type type)
         {
-            if(typeCache.Contains(type))
+            if(_typeCache.Contains(type))
             {
-                return typeCache[type];
+                return _typeCache[type];
             }
 
             if(type == typeof(IDependency))
             {
                 var result = new FakeDependency();
-                typeCache.Add(
+                _typeCache.Add(
                     type, 
                     result);
                 return result;
@@ -29,7 +29,7 @@ namespace Debugosaurus.BigUnits.Tests.Fakes
 
                 var result = Activator.CreateInstance(fakeDependencyType);
 
-                typeCache.Add(
+                _typeCache.Add(
                     type,
                     result);
 
@@ -39,7 +39,8 @@ namespace Debugosaurus.BigUnits.Tests.Fakes
             return null;
         }
 
-        public class FakeDependency : IDependency {}
-        public class FakeDependency<T> : IDependency<T> {}
+        private class FakeDependency : IDependency {}
+
+        private class FakeDependency<T> : IDependency<T> {}
     }
 }

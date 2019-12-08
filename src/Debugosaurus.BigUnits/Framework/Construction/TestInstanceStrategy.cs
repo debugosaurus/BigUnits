@@ -1,46 +1,43 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using Debugosaurus.BigUnits.Framework.Scopes;
 
 namespace Debugosaurus.BigUnits.Framework.Construction
 {
     public class TestInstanceStrategy
     {
-        private readonly ITestScope testScope;
+        private readonly IDictionary<Type, IBuildAction> _cache = new Dictionary<Type, IBuildAction>();
 
-        private readonly IConstructorStrategy constructorStrategy;
-
-        private readonly IDictionary<Type,IBuildAction> cache = new Dictionary<Type,IBuildAction>();
+        private readonly IConstructorStrategy _constructorStrategy;
+        private readonly ITestScope _testScope;
 
         public TestInstanceStrategy(
             ITestScope testScope,
             IConstructorStrategy constructorStrategy)
         {
-            this.testScope = testScope;
-            this.constructorStrategy = constructorStrategy;
+            _testScope = testScope;
+            _constructorStrategy = constructorStrategy;
         }
 
         public IBuildAction GetBuildAction(Type type)
         {
-            IBuildAction result;
-
-            if(cache.TryGetValue(type, out result))
+            if (_cache.TryGetValue(type, out var result))
             {
                 return result;
             }
 
-            if(testScope.IsInScope(type))
+            if (_testScope.IsInScope(type))
             {
                 var targetType = type;
 
-                if(type.IsAbstract || type.IsInterface)
+                if (type.IsAbstract || type.IsInterface)
                 {
-                    var scopedImplementationType = testScope.GetTypesInScope()
+                    var scopedImplementationType = _testScope.GetTypesInScope()
                         .Where(x => !x.IsAbstract && !x.IsInterface && type.IsAssignableFrom(x))
                         .Take(1)
                         .SingleOrDefault();
-                    if(scopedImplementationType != null)
+                    if (scopedImplementationType != null)
                     {
                         targetType = scopedImplementationType;
                     }
@@ -50,21 +47,19 @@ namespace Debugosaurus.BigUnits.Framework.Construction
                     }
                 }
 
-                var constructor = constructorStrategy.GetConstructor(targetType);  
-                result = new ConstructorBuildAction(
-                    type,
-                    constructor);
+                var constructor = _constructorStrategy.GetConstructor(targetType);
+                result = new ConstructorBuildAction(constructor);
             }
 
-            cache.Add(type, result);
+            _cache.Add(type, result);
             return result;
         }
 
         public IBuildAction[] GetBuildActionsInScope()
         {
-            return testScope
+            return _testScope
                 .GetTypesInScope()
-                .Select(x => GetBuildAction(x))
+                .Select(GetBuildAction)
                 .ToArray();
         }
     }

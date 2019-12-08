@@ -5,33 +5,32 @@ namespace Debugosaurus.BigUnits.Framework.Construction
 {
     public class TestInstanceProvider
     {
-        private readonly TypeCache typeCache;
-
-        private readonly IDependencyProvider fakeProvider;
+        private readonly IDependencyProvider _fakeProvider;
+        private readonly TypeCache _typeCache;
 
         public TestInstanceProvider(
             IDependencyProvider fakeProvider,
             TypeCache typeCache)
         {
-            this.fakeProvider = fakeProvider;
-            this.typeCache = typeCache;
+            _fakeProvider = fakeProvider;
+            _typeCache = typeCache;
         }
 
         public object CreateInstance(
             Type type,
             TestInstanceStrategy strategy)
         {
-            if(typeCache.Contains(type))
+            if (_typeCache.Contains(type))
             {
-                return typeCache[type];
+                return _typeCache[type];
             }
 
             object result;
 
             var buildAction = strategy.GetBuildAction(type);
-            if(buildAction == null)
+            if (buildAction == null)
             {
-                result = fakeProvider.GetDependency(type);
+                result = _fakeProvider.GetDependency(type);
             }
             else
             {
@@ -42,22 +41,22 @@ namespace Debugosaurus.BigUnits.Framework.Construction
                 result = buildAction.Build(parameters);
             }
 
-            typeCache.Add(
+            _typeCache.Add(
                 type,
                 result);
-            return result;   
+            return result;
         }
 
         public void SetDependency<TDependency>(TDependency dependency)
         {
-            typeCache.Add(
+            _typeCache.Add(
                 typeof(TDependency),
                 dependency);
         }
 
         public TDependency GetDependency<TDependency>()
         {
-            return (TDependency) typeCache[typeof(TDependency)];
+            return (TDependency) _typeCache[typeof(TDependency)];
         }
     }
 }

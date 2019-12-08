@@ -4,21 +4,21 @@ namespace Debugosaurus.BigUnits.Framework.Scopes
 {
     public class ClassTestScope : ITestScope
     {
-        private readonly Type type;
+        private readonly Type _type;
 
         public ClassTestScope(Type type)
         {
-            this.type = type;
+            _type = type;
         }
 
         public Type[] GetTypesInScope()
         {
-            return new[]{ type };
+            return new[] {_type};
         }
 
         public bool IsInScope(Type type)
         {
-            return type == this.type;
+            return type == _type;
         }
     }
 }
