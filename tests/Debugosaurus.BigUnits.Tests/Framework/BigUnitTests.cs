@@ -28,7 +28,7 @@ namespace Debugosaurus.BigUnits.Tests.Framework
                 x => x.Dependency2);
             ThenTheDependencyIsMocked(
                 result,
-                x => x.Dependency3);                
+                x => x.Dependency3);
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace Debugosaurus.BigUnits.Tests.Framework
             WhenATestInstanceIsRequested<PublicClassWithDefaultConstructor>(out var secondResult);
 
             secondResult.ShouldBe(firstResult);
-        }     
+        }
 
         [Fact]
         public void RequestingATestInstanceOutsideOfScopeCausesAnError()
@@ -49,7 +49,7 @@ namespace Debugosaurus.BigUnits.Tests.Framework
             GivenTheTestScopeIs(TestScopes.Class<PublicClassWithDefaultConstructor>());
             GivenTheDependencyProviderIs(new FakeDependencyProvider());
 
-            Action action  = () => WhenATestInstanceIsRequested<object>(out _);
+            Action action = () => WhenATestInstanceIsRequested<object>(out _);
 
             var exception = action.ShouldThrow<BigUnitsException>();
             exception.Data["TestInstanceType"].ShouldBe(typeof(object));
@@ -94,8 +94,8 @@ namespace Debugosaurus.BigUnits.Tests.Framework
             SetDependency(dependencyProvider);
         }
 
-        protected void ThenTheDependencyIsMocked<TResult,TDependency>(
-            TResult result, 
+        protected void ThenTheDependencyIsMocked<TResult, TDependency>(
+            TResult result,
             Func<TResult, TDependency> dependency)
         {
             var dependencyProvider = GetDependency<IDependencyProvider>();
@@ -114,7 +114,7 @@ namespace Debugosaurus.BigUnits.Tests.Framework
         protected void WhenATestInstanceIsRequested<TTestInstance>(out TTestInstance result)
         {
             result = TestInstance.GetTestInstance<TTestInstance>();
-        }        
+        }
 
         protected void ThenAConcreteTestInstanceIsProvided<TTestInstance>(TTestInstance testInstance)
         {
@@ -122,6 +122,6 @@ namespace Debugosaurus.BigUnits.Tests.Framework
                 () => testInstance.ShouldNotBeNull(),
                 () => testInstance.GetType().ShouldBe(typeof(TTestInstance))
             );
-        }        
+        }
     }
 }
