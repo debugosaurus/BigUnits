@@ -1,21 +1,21 @@
 using System;
 using System.Linq;
 using Debugosaurus.BigUnits.Exceptions;
-using Debugosaurus.BigUnits.Framework.Scopes;
 using Debugosaurus.BigUnits.Framework.Construction;
 
 namespace Debugosaurus.BigUnits.Framework
 {
     public class BigUnit
     {
-        public BigUnit(
-            ITestScope testScope,
-            TestInstanceStrategy testInstanceStrategy,
-            TestInstanceProvider testInstanceProvider) {
+        private readonly TestInstanceProvider _testInstanceProvider;
+        private readonly TestInstanceStrategy _testInstanceStrategy;
 
-            TestScope = testScope;
-            TestInstanceStrategy = testInstanceStrategy;
-            TestInstanceProvider = testInstanceProvider;
+        public BigUnit(
+            TestInstanceStrategy testInstanceStrategy,
+            TestInstanceProvider testInstanceProvider)
+        {
+            _testInstanceStrategy = testInstanceStrategy;
+            _testInstanceProvider = testInstanceProvider;
         }
 
         public TTestInstance GetTestInstance<TTestInstance>()
@@ -25,70 +25,55 @@ namespace Debugosaurus.BigUnits.Framework
 
         public object GetTestInstance(Type testInstanceType)
         {
-            var buildAction = TestInstanceStrategy.GetBuildAction(testInstanceType);
-            if(buildAction == null)
+            var buildAction = _testInstanceStrategy.GetBuildAction(testInstanceType);
+            if (buildAction == null)
             {
                 throw new BigUnitsException(
                     ExceptionMessages.TestInstanceNotInScope,
-                    ("TestInstanceType" , testInstanceType));            
+                    ("TestInstanceType", testInstanceType));
             }
-            
-            return TestInstanceProvider.CreateInstance(
-                testInstanceType, 
-                TestInstanceStrategy);
-        }        
 
-        public TestInstanceProvider TestInstanceProvider
-        {
-            get; set;
-        }
-
-        public TestInstanceStrategy TestInstanceStrategy
-        {
-            get; set;
+            return _testInstanceProvider.CreateInstance(
+                testInstanceType,
+                _testInstanceStrategy);
         }
 
         public void SetDependency<TDependency>(TDependency dependency)
-        {            
-            var buildActions = TestInstanceStrategy.GetBuildActionsInScope();
+        {
+            var buildActions = _testInstanceStrategy.GetBuildActionsInScope();
             var dependencies = buildActions
                 .Where(x => x != null)
                 .SelectMany(x => x.GetDependencyTypes())
                 .Distinct()
                 .Where(x => typeof(TDependency).IsAssignableFrom(x));
 
-            if(!dependencies.Any())
+            if (!dependencies.Any())
             {
                 throw new BigUnitsException(
                     ExceptionMessages.NotAValidDependencyType,
                     ("DependencyType", typeof(TDependency)));
             }
-            
-            TestInstanceProvider.SetDependency(dependency);
+
+            _testInstanceProvider.SetDependency(dependency);
         }
 
         public TDependency GetDependency<TDependency>()
         {
-            var buildActions = TestInstanceStrategy.GetBuildActionsInScope();
+            var buildActions = _testInstanceStrategy.GetBuildActionsInScope();
             var dependencies = buildActions
                 .Where(x => x != null)
                 .SelectMany(x => x.GetDependencyTypes())
                 .Distinct()
                 .Where(x => typeof(TDependency).IsAssignableFrom(x));
 
-            if(!dependencies.Any())
+            if (!dependencies.Any())
             {
                 throw new BigUnitsException(
                     ExceptionMessages.NotAValidDependencyType,
                     ("DependencyType", typeof(TDependency)));
             }
-            
-            return TestInstanceProvider.GetDependency<TDependency>();
-        }
 
-        public ITestScope TestScope
-        {
-            get; set;
+            return _testInstanceProvider.GetDependency<TDependency>();
         }
     }
 }

@@ -5,27 +5,29 @@ namespace Debugosaurus.BigUnits.Framework.Scopes
 {
     public class GlobalTestScope : ITestScope
     {
-        private static Type[] typesInScope;
+        private static volatile Type[] _typesInScope;
 
         private static readonly object SyncObj = new object();
 
         public Type[] GetTypesInScope()
         {
-            if(typesInScope == null)
+            if (_typesInScope != null)
             {
-                lock(SyncObj)
+                return _typesInScope;
+            }
+
+            lock (SyncObj)
+            {
+                if (_typesInScope == null)
                 {
-                    if(typesInScope == null)
-                    {
-                        typesInScope = AppDomain.CurrentDomain
-                            .GetAssemblies()
-                            .SelectMany(x => x.GetTypes())
-                            .ToArray();
-                    }
+                    _typesInScope = AppDomain.CurrentDomain
+                        .GetAssemblies()
+                        .SelectMany(x => x.GetTypes())
+                        .ToArray();
                 }
             }
 
-            return typesInScope;
+            return _typesInScope;
         }
 
         public bool IsInScope(Type type)

@@ -5,29 +5,29 @@ namespace Debugosaurus.BigUnits.Framework
 {
     public class TypeCache
     {
-        private IDictionary<Type, object> cache =  new Dictionary<Type, object>();
-
-        public bool Contains(Type type)
-        {
-            return cache.ContainsKey(type);
-        }
+        private readonly IDictionary<Type, object> _cache = new Dictionary<Type, object>();
 
         public object this[Type type]
         {
             get
             {
-                cache.TryGetValue(
+                _cache.TryGetValue(
                     type,
                     out var result);
                 return result;
             }
         }
 
+        public bool Contains(Type type)
+        {
+            return _cache.ContainsKey(type);
+        }
+
         public void Add(
             Type type,
-            object instance) 
+            object instance)
         {
-            cache[type] = instance;
+            _cache[type] = instance;
         }
     }
 }

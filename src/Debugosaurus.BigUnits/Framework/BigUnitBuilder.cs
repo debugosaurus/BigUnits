@@ -1,61 +1,59 @@
-using Debugosaurus.BigUnits.Framework.Scopes;
 using Debugosaurus.BigUnits.Framework.Construction;
+using Debugosaurus.BigUnits.Framework.Scopes;
 
 namespace Debugosaurus.BigUnits.Framework
 {
     public class BigUnitBuilder
     {
-        private ITestScope testScope;
+        private BigUnit _bigUnit;
 
-        private IConstructorStrategy constructorStrategy;
+        private IConstructorStrategy _constructorStrategy;
 
-        private IDependencyProvider dependencyProvider;
-
-        private BigUnit bigUnit;
+        private IDependencyProvider _dependencyProvider;
+        private ITestScope _testScope;
 
         public BigUnitBuilder()
         {
-            testScope = new GlobalTestScope();
-            constructorStrategy = new GreedyConstructorStrategy();
+            _testScope = new GlobalTestScope();
+            _constructorStrategy = new GreedyConstructorStrategy();
         }
 
         public BigUnitBuilder WithTestScope(ITestScope testScope)
         {
-            bigUnit = null;
-            this.testScope = testScope;
+            _bigUnit = null;
+            _testScope = testScope;
             return this;
         }
 
         public BigUnitBuilder WithConstructorStrategy(IConstructorStrategy constructorStrategy)
         {
-            bigUnit = null;
-            this.constructorStrategy = constructorStrategy;
+            _bigUnit = null;
+            _constructorStrategy = constructorStrategy;
             return this;
         }
 
         public BigUnitBuilder WithDependencyProvider(IDependencyProvider dependencyProvider)
         {
-            bigUnit = null;
-            this.dependencyProvider = dependencyProvider;
+            _bigUnit = null;
+            _dependencyProvider = dependencyProvider;
             return this;
         }
 
         public BigUnit Build()
         {
-            if(bigUnit == null)
+            if (_bigUnit == null)
             {
-                bigUnit = new BigUnit(
-                    testScope,
-                    new TestInstanceStrategy(
-                        testScope,
-                        constructorStrategy),
+                _bigUnit = new BigUnit(new TestInstanceStrategy(
+                        _testScope,
+                        _constructorStrategy),
                     new TestInstanceProvider(
-                        dependencyProvider,
+                        _dependencyProvider,
                         new TypeCache()
                     )
                 );
             }
-            return bigUnit;
+
+            return _bigUnit;
         }
     }
 }

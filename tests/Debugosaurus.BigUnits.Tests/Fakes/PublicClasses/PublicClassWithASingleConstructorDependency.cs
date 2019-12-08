@@ -2,11 +2,11 @@ namespace Debugosaurus.BigUnits.Tests.Fakes.PublicClasses
 {
     public class PublicClassWithASingleConstructorDependency
     {
-        private IDependency dependency;
+        private IDependency _dependency;
 
         public PublicClassWithASingleConstructorDependency(IDependency dependency) 
         {
-            this.dependency = dependency;
+            this._dependency = dependency;
         }
     }     
 }
