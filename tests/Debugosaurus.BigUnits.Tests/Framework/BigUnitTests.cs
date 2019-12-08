@@ -6,8 +6,6 @@ using Debugosaurus.BigUnits.Framework.Scopes;
 using Xunit;
 using Shouldly;
 using System;
-using System.Reflection;
-using System.Collections.Generic;
 
 namespace Debugosaurus.BigUnits.Tests.Framework
 {
@@ -17,36 +15,30 @@ namespace Debugosaurus.BigUnits.Tests.Framework
         public void ClassScopeCanProvideTestInstancesForConcreteClasses()
         {
             GivenTheTestScopeIs(TestScopes.Class<PublicClassWithMultipleConstructorDependencies>());
-            
             GivenTheDependencyProviderIs(new FakeDependencyProvider());
 
-            WhenATestInstanceIsRequested(
-                typeof(PublicClassWithMultipleConstructorDependencies),
-                out var result);
+            WhenATestInstanceIsRequested<PublicClassWithMultipleConstructorDependencies>(out var result);
 
-            ThenAConcreteTestInstanceIsProvided(
+            ThenAConcreteTestInstanceIsProvided(result);
+            ThenTheDependencyIsMocked(
                 result,
-                typeof(PublicClassWithMultipleConstructorDependencies));
-
-            ThenAllDependenciesAreMocked(
+                x => x.Dependency1);
+            ThenTheDependencyIsMocked(
                 result,
-                typeof(PublicClassWithMultipleConstructorDependencies));
+                x => x.Dependency2);
+            ThenTheDependencyIsMocked(
+                result,
+                x => x.Dependency3);                
         }
 
         [Fact]
         public void SameTestInstanceIsRetrievedEachTimeItIsRequested()
         {
             GivenTheTestScopeIs(TestScopes.Class<PublicClassWithDefaultConstructor>());
-            
             GivenTheDependencyProviderIs(new FakeDependencyProvider());
 
-            WhenATestInstanceIsRequested(
-                typeof(PublicClassWithDefaultConstructor),
-                out var firstResult);
-
-            WhenATestInstanceIsRequested(
-                typeof(PublicClassWithDefaultConstructor),
-                out var secondResult);
+            WhenATestInstanceIsRequested<PublicClassWithDefaultConstructor>(out var firstResult);
+            WhenATestInstanceIsRequested<PublicClassWithDefaultConstructor>(out var secondResult);
 
             secondResult.ShouldBe(firstResult);
         }     
@@ -57,9 +49,7 @@ namespace Debugosaurus.BigUnits.Tests.Framework
             GivenTheTestScopeIs(TestScopes.Class<PublicClassWithDefaultConstructor>());
             GivenTheDependencyProviderIs(new FakeDependencyProvider());
 
-            Action action  = () => WhenATestInstanceIsRequested(
-                typeof(object),
-                out _);
+            Action action  = () => WhenATestInstanceIsRequested<object>(out _);
 
             var exception = action.ShouldThrow<BigUnitsException>();
             exception.Data["TestInstanceType"].ShouldBe(typeof(object));
@@ -104,20 +94,16 @@ namespace Debugosaurus.BigUnits.Tests.Framework
             SetDependency(dependencyProvider);
         }
 
-        protected void ThenAllDependenciesAreMocked(
-            object result, 
-            Type testInstanceType)
+        protected void ThenTheDependencyIsMocked<TResult,TDependency>(
+            TResult result, 
+            Func<TResult, TDependency> dependency)
         {
             var dependencyProvider = GetDependency<IDependencyProvider>();
 
-            foreach(var dependencyField in testInstanceType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance))
-            {
-                var dependency = dependencyField.GetValue(result);
-                var dependencyType = dependencyField.FieldType;
+            var expected = dependency(result);
+            var actual = dependencyProvider.GetDependency(typeof(TDependency));
 
-                dependency.ShouldNotBeNull();
-                dependency.ShouldBe(dependencyProvider.GetDependency(dependencyType));
-            }    
+            actual.ShouldBe(expected);
         }
 
         protected void GivenTheTestScopeIs(ITestScope testScope)
@@ -125,21 +111,17 @@ namespace Debugosaurus.BigUnits.Tests.Framework
             SetDependency(testScope);
         }
 
-        protected void WhenATestInstanceIsRequested(
-            Type testInstanceType,
-            out object result)
+        protected void WhenATestInstanceIsRequested<TTestInstance>(out TTestInstance result)
         {
-            result = TestInstance.GetTestInstance(testInstanceType);
-        }
+            result = TestInstance.GetTestInstance<TTestInstance>();
+        }        
 
-        protected void ThenAConcreteTestInstanceIsProvided(
-            object result,
-            Type expectedType)
+        protected void ThenAConcreteTestInstanceIsProvided<TTestInstance>(TTestInstance testInstance)
         {
-            result.ShouldSatisfyAllConditions(
-                () => result.ShouldNotBeNull(),
-                () => result.ShouldBeOfType(expectedType)
+            testInstance.ShouldSatisfyAllConditions(
+                () => testInstance.ShouldNotBeNull(),
+                () => testInstance.GetType().ShouldBe(typeof(TTestInstance))
             );
-        }
+        }        
     }
 }
