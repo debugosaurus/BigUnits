@@ -53,10 +53,5 @@ namespace Debugosaurus.BigUnits.Framework.Construction
                 typeof(TDependency),
                 dependency);
         }
-
-        public TDependency GetDependency<TDependency>()
-        {
-            return (TDependency) _typeCache[typeof(TDependency)];
-        }
     }
 }

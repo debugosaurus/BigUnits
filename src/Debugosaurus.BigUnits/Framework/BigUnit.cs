@@ -73,7 +73,9 @@ namespace Debugosaurus.BigUnits.Framework
                     ("DependencyType", typeof(TDependency)));
             }
 
-            return _testInstanceProvider.GetDependency<TDependency>();
+            return (TDependency) _testInstanceProvider.CreateInstance(
+                typeof(TDependency),
+                _testInstanceStrategy);
         }
     }
 }
