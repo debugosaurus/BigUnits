@@ -1,6 +1,5 @@
 using System;
-using Debugosaurus.BigUnits.Framework;
-using Debugosaurus.BigUnits.Moq;
+using Debugosaurus.BigUnits.Tests;
 using Moq;
 using Shouldly;
 using Xunit;
