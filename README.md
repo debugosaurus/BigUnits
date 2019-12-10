@@ -1,12 +1,12 @@
-# BigUnits #
+# BigUnits
 
 ![GitHub Build Status](https://github.com/debugosaurus/BigUnits/workflows/.NET%20Core/badge.svg)
 
-**BigUnits** is a library that aims to provide flexibility in how you scope "unit tests" within a solution - with the aim of supporting the development of tests that provide value beyond simply proving to others that your code works.
+**BigUnits** is a library that aims to provide flexibility in how you scope "unit tests" within a solution - with the aim of supporting the development of [sociable](https://martinfowler.com/articles/practical-test-pyramid.html#SociableAndSolitary) units tests that provide value beyond simply proving to others that your code works.
 
-## Table of contents ##
+Pretty much everywhere I've worked has had their own unit test base classes that implement some form of [auto-mocking container](https://blog.ploeh.dk/2013/03/11/auto-mocking-container/) in order to simplify the creation and maintenance of unit tests (where they haven't I've been quick to introduce it). Without exception this pattern has been constrained to solitary / strict unit tests only. **BigUnits** aims to provide the benefits of auto-mocking to larger scoped tests - allowing you to use real test instances of classes within a namespace, for example, while mocking everything outside of it.
 
-## The problem ##
+# Why?
 
 > The tests we write are not adding value, at least not anywhere near enough compared to the time spent writing and maintaining them
 
@@ -23,6 +23,48 @@ So the traditional way to mitigate the above issues is to use a mix of unit test
 
 When an integration test suite becomes difficult to run you tend to find that people stop running them, and then they start ignoring flaky test results, then they start to ignore all test results, before long the only maintenance such suites get is to ensure the code compiles and doesn't block the build process.
 
-## The solution ##
+# Usage
 
-The solution, I think, is not that integration tests are bad, just that we need a way to better define and control their scope so we can model them more like traditional unit tests. This is what `BigUnits` attempts to do, it tries to apply **IOC** and **auto-mocking** from traditional unit tests to a wider scope - effectively allowing you to write "unit" tests that span beyond the traditional class scope.
+The library is very opinionated at the moment, but over time I hope to iron out assumptions and limitations. The intent is for consumers to declare abstract test bases that use the `BigUnit` class to driven test functionality. As an example (see: [UnitTest.cs](./tests/Debugosaurus.BigUnits.Tests/UnitTest.cs))
+
+```CSharp
+public abstract class UnitTest<T> where T : class
+{
+    private BigUnitBuilder _bigUnitBuilder;
+
+    protected UnitTest() 
+    {
+        _bigUnitBuilder = new BigUnitBuilder()
+            .WithTestScope(TestScopes.Class<T>())
+            .WithDependencyProvider(new NotImplementedDependencyProvider());
+    }
+
+    private BigUnit BigUnit => _bigUnitBuilder.Build();
+
+    protected T TestInstance => BigUnit.GetTestInstance<T>();
+
+    protected void SetDependency<TDependency>(TDependency dependency)
+    {
+        BigUnit.SetDependency(dependency);
+    }
+
+    protected TDependency GetDependency<TDependency>()
+    {
+        return BigUnit.GetDependency<TDependency>();
+    }    
+}
+```
+* `TestInstance` - Gets the instance that will be tested - often called the **SUT**
+* `GetDependency` - retrieves the dependency that was / will be used when creating the `TestInstance`
+* `SetDependency` - sets the dependency that will be used when creating the `TestInstance`
+
+# Features
+
+**BigUnits** is in a very early stage of development, so there are big gaps in what it can do, but at a glance:
+
+* Auto mock constructor dependencies using *Moq*
+* Support for the following test scopes:
+    * class scope (ie: solitary / strict unit test)
+    * namespace scope (ie: use real instance of classes within a shared namespace and mock everything else)
+* Provide concrete test instances for classes within a defined scope
+* Override scoping and mocking behaviour by explicitly nominating instances to use
