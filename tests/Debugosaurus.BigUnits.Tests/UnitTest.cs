@@ -9,7 +9,8 @@ namespace Debugosaurus.BigUnits.Tests
         protected UnitTest() 
         {
             _bigUnitBuilder = new BigUnitBuilder()
-                .WithTestScope(TestScopes.Class<T>());
+                .WithTestScope(TestScopes.Class<T>())
+                .WithDependencyProvider(new NotImplementedDependencyProvider());
         }
 
         private BigUnit BigUnit => _bigUnitBuilder.Build();
