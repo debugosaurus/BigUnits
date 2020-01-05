@@ -77,7 +77,11 @@ The library is very opinionated at the moment, but over time I hope to iron out 
 
 ## Example base test class
 
-The intent is for consumers to declare abstract test bases that use the `BigUnit` class to driven test functionality. As an example (see: [UnitTest.cs](./tests/Debugosaurus.BigUnits.Tests/IntegrationTest.cs)). The library will at somepoint provide some boilerplate implementations for these base classes (once the library is more stable).
+The intent is for consumers to declare abstract test bases that use the `BigUnit` class to driven test functionality - the rationale being that this allows you to wire up your tests in the way that most makes sense to your needs, along with enabling you to mix and match various frameworks.
+
+As an example (see: [UnitTest.cs](./tests/Debugosaurus.BigUnits.Tests/IntegrationTest.cs)) - where, for my purposes, I've decided that an integration test is scoped to the namespace (and all child namespaces) of a nominated class.
+
+The library will at somepoint provide some boilerplate implementations for these base classes (once the library is more stable).
 
 ```CSharp
 public abstract class IntegrationTest<T> where T : class
@@ -117,22 +121,52 @@ public abstract class IntegrationTest<T> where T : class
 
 ## Example test
 
+A poor example, but the idea is that the feature below orchestrates the sanitising and formatting of the popup message.
+
+```CSharp
+
+public class CookiePopupFeature
+{
+    private ICurrentUser _user;
+    private ICookieMessageProvider _cookieMessageProvider;
+
+    private CookieMessageFormatter _cookieMessageFormatter;
+    private CookieMessageSanitiser _cookieMessageSanitiser;
+    private CookieMessageHtmlWrapper _cookieMessageHtmlWrapper;
+
+    public CookiePopup GetCookiePopup()
+    {
+        if(_user.HasAcceptedCookies)
+        {
+            return CookiePopup.Empty;
+        }
+
+        var messageTemplate = _cookieMessageProvider.GetTemplate();
+        var message = _cookieMessageFormatter.Format(_user.IsLoggedIn ? _user.DisplayName : "you");
+        message = _cookieMessageSanitiser.Sanitise(message);
+        message = _cookieMessageHtmlWrapper.WrapMessage(message);
+
+        return new CookiePopup(
+            true,
+            messageTemplate,
+            message
+        );
+    }
+}
+
+```
+
 ```CSharp
 public class CookiePopupTests : IntegrationTest<CookiePopupFeature>
 {
-    private const string TestCookieText = "Hi there, our site uses COOKIES!! <script>alert('unsafe')</script>";
-    private const string ExpectedFormattedCookieText = "Hi there, our site uses COOKIES!!";
+    private const string TestCookieText = "Hi {USERNAME}, our site uses COOKIES!! <script>alert('unsafe')</script>";
+    private const string ExpectedFormattedCookieText = "<div class=\"cookiePopup\">Hi you, our site uses COOKIES!!</div>";
 
-    // in this example GetCookiePopup is responsible for the orchestration to text retrieval, formatting, sanitising sub components 
     [Fact]
     public void ReturnsFormattedCookieTextWhenUserHasNotAcceptedCookies()
     {     
-        GetDependency<ICurrentUser>()
-            .Setup(x => x.HasAcceptedCookies)
-            .Returns(false);
-        GetDependency<ICookieTextProvider>()
-            .Setup(x => x.GetCookieText())
-            .Returns(TestCookieText)
+        GivenTheUserHasNotAcceptedCookies();
+        GivenTheMessageTemplateIs(TestCookieText);
         
         var result = TestInstance.GetCookiePopup();
 
@@ -141,6 +175,20 @@ public class CookiePopupTests : IntegrationTest<CookiePopupFeature>
             RawText = TestCookieText,
             Text = ExpectedFormattedCookieText
         });
+    }
+
+    private void GivenTheUserHasNotAcceptedCookies()
+    {
+        GetDependency<ICurrentUser>()
+            .Setup(x => x.HasAcceptedCookies)
+            .Returns(false);
+    }
+
+    private void GivenTheMessageTemplateIs(string messageTemplate)
+    {
+        GetDependency<ICookieMessageProvider>()
+            .Setup(x => x.GetTemplate())
+            .Returns(messageTemplate)
     }
 }
 
