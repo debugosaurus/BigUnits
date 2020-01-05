@@ -1,5 +1,9 @@
 name: .NET Core
 
+env:
+  VERSION: 0.0.0.1
+  VERSION_SUFFIX: pre
+
 on: [push]
 
 jobs:
@@ -13,7 +17,17 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.100
-    - name: Build with dotnet
+    - name: Build
       run: dotnet build --configuration Release
-    - name: Test with dotnet
-      run: dotnet test --configuration Release
+    - name: Test
+      run: dotnet test --configuration Release --no-build
+    - name: Package
+      run: |
+        dotnet pack ./src/Debugosaurus.BigUnits/Debugosaurus.BigUnits.csproj --configuration Release --no-build -p:Version=$VERSION -p:PackageVersion=$VERSION --version-suffix $VERSION_SUFFIX -p:RepositoryUrl=https://github.com/debugosaurus/BigUnits
+        dotnet pack ./src/Debugosaurus.BigUnits.Moq/Debugosaurus.BigUnits.Moq.csproj --configuration Release --no-build -p:Version=$VERSION -p:PackageVersion=$VERSION --version-suffix $VERSION_SUFFIX -p:RepositoryUrl=https://github.com/debugosaurus/BigUnits
+    - name: Generate nuget config
+      run: sed 's/TOKEN/${{ secrets.GITHUB_TOKEN }}/g' github.nuget.config > nuget.config
+    - name: Publish
+      run: |
+        dotnet nuget push "./src/Debugosaurus.BigUnits/bin/Release/Debugosaurus.BigUnits.$VERSION.nupkg" --source github
+        dotnet nuget push "./src/Debugosaurus.BigUnits.Moq/bin/Release/Debugosaurus.BigUnits.Moq.$VERSION.nupkg" --source github
