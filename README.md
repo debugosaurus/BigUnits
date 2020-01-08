@@ -77,43 +77,27 @@ The library is very opinionated at the moment, but over time I hope to iron out 
 
 ## Example base test class
 
-The intent is for consumers to declare abstract test bases that use the `BigUnit` class to driven test functionality - the rationale being that this allows you to wire up your tests in the way that most makes sense to your needs, along with enabling you to mix and match various frameworks.
+The intent is for consumers to declare test bases that extend the various abstract test classes (`BaseUnitTest`, `BaseBigUnitTest` etc); or directly use the `BigUnit` class to drive test functionality. This way you can wire up your tests in the way that most makes sense to your needs, along with enabling you to mix and match various frameworks.
 
-As an example (see: [UnitTest.cs](./tests/Debugosaurus.BigUnits.Tests/IntegrationTest.cs)) - where, for my purposes, I've decided that an integration test is scoped to the namespace (and all child namespaces) of a nominated class.
+As an example (see: [BigUnitTest.cs](./tests/Debugosaurus.BigUnits.Tests/BigUnitTest.cs)) - where, for my purposes, I've decided that a big unit test is scoped to the namespace (and all child namespaces) of a nominated class.
 
-The library will at somepoint provide some boilerplate implementations for these base classes (once the library is more stable).
+> In the future I hope to offer a bit more flexibility / fluidity in defining your test scaffolding.
 
 ```CSharp
-public abstract class IntegrationTest<T> where T : class
+public abstract class BigUnitTest<T> : BaseBigUnitTest where T : class
 {
-    private BigUnitBuilder _bigUnitBuilder;
+    protected BigUnitTest() : base(
+        TestScopes.Namespace<T>(),
+        new MoqDependencyProvider())
+    {}
 
-    protected IntegrationTest()
-    {
-        _bigUnitBuilder = new BigUnitBuilder()
-            .WithTestScope(TestScopes.Namespace<T>())
-            .WithDependencyProvider(new MoqDependencyProvider());
-    }
-
-    private BigUnit BigUnit => _bigUnitBuilder.Build();
-
-    protected T TestInstance => BigUnit.GetTestInstance<T>();
-
-    protected void SetDependency<TDependency>(TDependency dependency)
-    {
-        BigUnit.SetDependency(dependency);
-    }
-
-    protected TDependency GetDependency<TDependency>()
-    {
-        return BigUnit.GetDependency<TDependency>();
-    }
+    protected T TestInstance => base.GetTestInstance<T>();
 }
 ```
 * `<T>` - a class within the namespace that is used to define the scope
-* `TestInstance` - Gets a instance that will be used in the test - often called the **SUT**
-* `GetDependency` - retrieves the dependency that was / will be used when creating the `TestInstance`s
-* `SetDependency` - sets the dependency that will be used when creating the `TestInstance`s
+* `TestInstance` - Gets a singular instance that will be used in the test - often called the **SUT**
+* `GetDependency` (inherited) - retrieves the dependency that was / will be used when creating the `TestInstance`s
+* `SetDependency` (inherited) - sets the dependency that will be used when creating the `TestInstance`s
 
 ## Dependency provider libraries
 
@@ -157,7 +141,7 @@ public class CookiePopupFeature
 ```
 
 ```CSharp
-public class CookiePopupTests : IntegrationTest<CookiePopupFeature>
+public class CookiePopupTests : BigUnitTest<CookiePopupFeature>
 {
     private const string TestCookieText = "Hi {USERNAME}, our site uses COOKIES!! <script>alert('unsafe')</script>";
     private const string ExpectedFormattedCookieText = "<div class=\"cookiePopup\">Hi you, our site uses COOKIES!!</div>";

@@ -4,7 +4,7 @@ using Debugosaurus.BigUnits.Framework.Scopes;
 
 namespace Debugosaurus.BigUnits.Tests.Framework
 {
-    public class BigUnitTests : IntegrationTest<BigUnit>
+    public class BigUnitTests : BigUnitTest<BigUnit>
     {
         protected IDependencyProvider FakeDependencyProvider => new FakeDependencyProvider();
 

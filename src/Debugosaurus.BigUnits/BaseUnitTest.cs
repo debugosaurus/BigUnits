@@ -1,16 +1,16 @@
 using Debugosaurus.BigUnits.Framework;
 
-namespace Debugosaurus.BigUnits.Tests
+namespace Debugosaurus.BigUnits
 {
-    public class IntegrationTest<T> where T : class
+    public abstract class BaseUnitTest<T> where T : class
     {
         private BigUnitBuilder _bigUnitBuilder;
 
-        protected IntegrationTest()
+        protected BaseUnitTest(IDependencyProvider dependencyProvider) 
         {
             _bigUnitBuilder = new BigUnitBuilder()
-                .WithTestScope(TestScopes.Namespace<T>())
-                .WithDependencyProvider(new NotImplementedDependencyProvider());
+                .WithTestScope(TestScopes.Class<T>())
+                .WithDependencyProvider(dependencyProvider);
         }
 
         private BigUnit BigUnit => _bigUnitBuilder.Build();
@@ -25,6 +25,6 @@ namespace Debugosaurus.BigUnits.Tests
         protected TDependency GetDependency<TDependency>()
         {
             return BigUnit.GetDependency<TDependency>();
-        }
+        }        
     }
 }
