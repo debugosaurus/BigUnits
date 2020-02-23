@@ -1,3 +1,4 @@
+using System;
 using Debugosaurus.BigUnits.Framework.Construction;
 using Debugosaurus.BigUnits.Framework.Scopes;
 
@@ -10,6 +11,7 @@ namespace Debugosaurus.BigUnits.Framework
         private IConstructorStrategy _constructorStrategy;
 
         private IDependencyProvider _dependencyProvider;
+
         private ITestScope _testScope;
 
         public BigUnitBuilder()

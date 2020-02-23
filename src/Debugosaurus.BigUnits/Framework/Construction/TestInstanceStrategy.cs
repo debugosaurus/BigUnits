@@ -47,6 +47,13 @@ namespace Debugosaurus.BigUnits.Framework.Construction
                     }
                 }
 
+                if (type.IsEnum)
+                {
+                    return new ExplicitBuildAction(
+                        type,
+                        Enum.ToObject(type, 0));
+                }
+
                 var constructor = _constructorStrategy.GetConstructor(targetType);
                 result = new ConstructorBuildAction(
                     type,
@@ -63,6 +70,13 @@ namespace Debugosaurus.BigUnits.Framework.Construction
                 .GetTypesInScope()
                 .Select(GetBuildAction)
                 .ToArray();
+        }
+
+        public ITestScope TestScope {
+            get
+            {
+                return _testScope;
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 using Debugosaurus.BigUnits.Tests.Fakes;
 using Debugosaurus.BigUnits.Framework;
 using Debugosaurus.BigUnits.Framework.Scopes;
+using System;
 
 namespace Debugosaurus.BigUnits.Tests.Framework
 {

@@ -1,3 +1,4 @@
+using System;
 using Debugosaurus.BigUnits.Framework;
 using Debugosaurus.BigUnits.Framework.Scopes;
 
@@ -7,16 +8,21 @@ namespace Debugosaurus.BigUnits
     {
         private BigUnitBuilder _bigUnitBuilder;
 
-        protected BaseBigUnitTest(
-            ITestScope testScope,
-            IDependencyProvider dependencyProvider)
+        protected BaseBigUnitTest(IDependencyProvider dependencyProvider)
         {
             _bigUnitBuilder = new BigUnitBuilder()
-                .WithTestScope(testScope)
                 .WithDependencyProvider(dependencyProvider);
         }
 
         private BigUnit BigUnit => _bigUnitBuilder.Build();
+
+        protected ITestScope TestScope
+        {
+            set 
+            {
+                _bigUnitBuilder.WithTestScope(value);
+            }
+        }
 
         protected TTestInstance GetTestInstance<TTestInstance>()
         {

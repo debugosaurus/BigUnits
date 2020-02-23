@@ -3,13 +3,15 @@ using System.Linq;
 
 namespace Debugosaurus.BigUnits.Framework.Scopes
 {
-    public class NamespaceScope : BaseTestScope
+    public class ChildNamespaceScope : BaseTestScope
     {
         private readonly Type _type;
+        private readonly string _namespacePrefix;
 
-        public NamespaceScope(Type type)
+        public ChildNamespaceScope(Type type)
         {
             _type = type;
+            _namespacePrefix = type.Namespace + ".";
         }
 
         protected override Type[] FetchTypesInScope()
@@ -27,12 +29,12 @@ namespace Debugosaurus.BigUnits.Framework.Scopes
 
         private bool MatchesNamespace(Type type)
         {
-            return type.Namespace == _type.Namespace;
+            return type.Namespace != null && type.Namespace.StartsWith(_namespacePrefix);
         }
 
         public override string ToString()
         {
-            return $"namespace equals '{_type.Namespace}'";
+            return $"child namespace of '{_type.Namespace}'";
         }
     }
 }

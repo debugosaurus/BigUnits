@@ -50,7 +50,9 @@ namespace Debugosaurus.BigUnits.Framework
             if (!dependencies.Any())
             {
                 throw new BigUnitsException(
-                    ExceptionMessages.NotAValidDependencyType,
+                    ExceptionMessages.NotAValidDependencyType(
+                        typeof(TDependency).FullName, 
+                        _testInstanceStrategy.TestScope.ToString()),
                     ("DependencyType", typeof(TDependency)));
             }
 
@@ -69,7 +71,9 @@ namespace Debugosaurus.BigUnits.Framework
             if (!dependencies.Any())
             {
                 throw new BigUnitsException(
-                    ExceptionMessages.NotAValidDependencyType,
+                    ExceptionMessages.NotAValidDependencyType(
+                        typeof(TDependency).FullName, 
+                        _testInstanceStrategy.TestScope.ToString()),
                     ("DependencyType", typeof(TDependency)));
             }
 
