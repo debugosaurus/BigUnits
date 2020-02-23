@@ -5,6 +5,11 @@ namespace Debugosaurus.BigUnits.Framework
 {
     public static class TestScopes
     {
+        public static ITestScope Any()
+        {
+            return new GlobalTestScope();
+        }
+
         public static ITestScope Class<T>() where T : class
         {
             return Class(typeof(T));
@@ -17,7 +22,21 @@ namespace Debugosaurus.BigUnits.Framework
 
         public static ITestScope Namespace<T>()
         {
-            return new NamespaceScope(typeof(T));
+            return Namespace<T>(NamespaceOptions.IncludeChildNamespaces);
+        }
+
+        public static ITestScope Namespace<T>(NamespaceOptions options)
+        {
+            if(options == NamespaceOptions.ExactNamespaceOnly)
+            {
+                return new NamespaceScope(typeof(T));
+            }
+            else
+            {
+                return new OrTestScope(
+                    new NamespaceScope(typeof(T)),
+                    new ChildNamespaceScope(typeof(T)));
+            }
         }
     }
 }

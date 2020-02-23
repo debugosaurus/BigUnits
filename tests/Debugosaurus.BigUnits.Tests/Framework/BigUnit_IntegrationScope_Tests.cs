@@ -1,4 +1,5 @@
 using Debugosaurus.BigUnits.Framework;
+using Debugosaurus.BigUnits.Framework.Scopes;
 using Debugosaurus.BigUnits.Tests.Fakes;
 using Debugosaurus.BigUnits.Tests.Fakes.PublicClasses;
 using Shouldly;
