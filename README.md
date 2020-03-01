@@ -79,17 +79,17 @@ The library is very opinionated at the moment, but over time I hope to iron out 
 
 The intent is for consumers to declare test bases that extend the various abstract test classes (`BaseUnitTest`, `BaseBigUnitTest` etc); or directly use the `BigUnit` class to drive test functionality. This way you can wire up your tests in the way that most makes sense to your needs, along with enabling you to mix and match various frameworks.
 
-As an example (see: [BigUnitTest.cs](./tests/Debugosaurus.BigUnits.Tests/BigUnitTest.cs)) - where, for my purposes, I've decided that a big unit test is scoped to the namespace (and all child namespaces) of a nominated class.
+As an example (see: [BigUnitTest.cs](./tests/Debugosaurus.BigUnits.Tests/BigUnitTest.cs)) - where, for my purposes, I've decided that a big unit test is scoped to the namespace (and all child namespaces) of a nominated class. Also note I'm using the `NotImplementedDependencyProvider` which just means an exception is thrown every time a test attempts to request a dependency that hasn't already been explicitly set.
 
 > In the future I hope to offer a bit more flexibility / fluidity in defining your test scaffolding.
 
 ```CSharp
-public abstract class BigUnitTest<T> : BaseBigUnitTest where T : class
+public class BigUnitTest<T> : BaseBigUnitTest where T : class
 {
-    protected BigUnitTest() : base(
-        TestScopes.Namespace<T>(),
-        new MoqDependencyProvider())
-    {}
+    protected BigUnitTest() : base(new NotImplementedDependencyProvider())
+    {
+        TestScope = TestScopes.Namespace<T>(NamespaceOptions.IncludeChildNamespaces);
+    }
 
     protected T TestInstance => base.GetTestInstance<T>();
 }
