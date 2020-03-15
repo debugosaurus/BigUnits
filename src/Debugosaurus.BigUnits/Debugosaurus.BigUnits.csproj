@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>Debugosaurus.BigUnits</PackageId>
+    <PackageId>BigUnits</PackageId>
     <Authors>Andy McDowall</Authors>
     <PackageDescription>BigUnits is a library that aims to provide flexibility in how you scope unit tests within a solution - with the aim of supporting the development of sociable units tests.</PackageDescription>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>

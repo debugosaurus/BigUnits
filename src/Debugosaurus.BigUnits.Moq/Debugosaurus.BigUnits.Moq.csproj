@@ -1,5 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>BigUnits.Moq</PackageId>
+    <Authors>Andy McDowall</Authors>
+    <PackageDescription>Provides support for using Moq with BigUnits</PackageDescription>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageIcon>icon.png</PackageIcon>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Debugosaurus.BigUnits\Debugosaurus.BigUnits.csproj" />
   </ItemGroup>
