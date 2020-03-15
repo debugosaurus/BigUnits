@@ -22,12 +22,13 @@ jobs:
       run: dotnet test --configuration Release --no-build
   
   publish:
-    if: github.ref == 'refs/heads/master'
     - name: Package
+      if: github.ref == 'refs/heads/master'
       run: |
         dotnet pack ./src/Debugosaurus.BigUnits/Debugosaurus.BigUnits.csproj --configuration Release --no-build -p:Version=$VERSION -p:PackageVersion=$VERSION -p:RepositoryUrl=https://github.com/debugosaurus/BigUnits
         dotnet pack ./src/Debugosaurus.BigUnits.Moq/Debugosaurus.BigUnits.Moq.csproj --configuration Release --no-build -p:Version=$VERSION -p:PackageVersion=$VERSION -p:RepositoryUrl=https://github.com/debugosaurus/BigUnits
     - name: Publish
+      if: github.ref == 'refs/heads/master'
       run: |
         dotnet nuget push "./src/Debugosaurus.BigUnits/bin/Release/Debugosaurus.BigUnits.$VERSION.nupkg" -k ${{ secrets.NUGET_DOT_ORG_PUBLISH_KEY }} -s https://api.nuget.org/v3/index.json
         dotnet nuget push "./src/Debugosaurus.BigUnits.Moq/bin/Release/Debugosaurus.BigUnits.Moq.$VERSION.nupkg" -k ${{ secrets.NUGET_DOT_ORG_PUBLISH_KEY }} -s https://api.nuget.org/v3/index.json
