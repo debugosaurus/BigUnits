@@ -22,7 +22,7 @@ jobs:
       run: dotnet test --configuration Release --no-build
   
   publish:
-    if: github.ref == 'refs/heads/master'
+    - if: github.ref == 'refs/heads/master'
     - name: Package
       run: |
         dotnet pack ./src/Debugosaurus.BigUnits/Debugosaurus.BigUnits.csproj --configuration Release --no-build -p:Version=$VERSION -p:PackageVersion=$VERSION -p:RepositoryUrl=https://github.com/debugosaurus/BigUnits
