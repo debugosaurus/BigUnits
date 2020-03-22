@@ -10,6 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\..\icon.png" Pack="true" PackagePath="$(PackageIcon)"/>
+    <None Include="..\..\LICENSE" Pack="true" PackagePath=""/>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Debugosaurus.BigUnits\Debugosaurus.BigUnits.csproj" />
   </ItemGroup>
 
