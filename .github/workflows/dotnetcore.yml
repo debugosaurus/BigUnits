@@ -20,19 +20,13 @@ jobs:
       run: dotnet build --configuration Release
     - name: Test
       run: dotnet test --configuration Release --no-build
-  
-  publish:
-    
-    needs: build
-    runs-on: ubuntu-latest
-    if: contains(github.ref, 'master')
-    
-    steps:
     - name: Package
+      if: contains(github.ref, 'master')
       run: |
         dotnet pack ./src/Debugosaurus.BigUnits/Debugosaurus.BigUnits.csproj --configuration Release --no-build -p:Version=$VERSION -p:PackageVersion=$VERSION -p:RepositoryUrl=https://github.com/debugosaurus/BigUnits
         dotnet pack ./src/Debugosaurus.BigUnits.Moq/Debugosaurus.BigUnits.Moq.csproj --configuration Release --no-build -p:Version=$VERSION -p:PackageVersion=$VERSION -p:RepositoryUrl=https://github.com/debugosaurus/BigUnits
     - name: Publish
+      if: contains(github.ref, 'master')
       run: |
         dotnet nuget push "./src/Debugosaurus.BigUnits/bin/Release/Debugosaurus.BigUnits.$VERSION.nupkg" -k ${{ secrets.NUGET_DOT_ORG_PUBLISH_KEY }} -s https://api.nuget.org/v3/index.json
         dotnet nuget push "./src/Debugosaurus.BigUnits.Moq/bin/Release/Debugosaurus.BigUnits.Moq.$VERSION.nupkg" -k ${{ secrets.NUGET_DOT_ORG_PUBLISH_KEY }} -s https://api.nuget.org/v3/index.json
