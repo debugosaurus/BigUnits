@@ -23,13 +23,12 @@ jobs:
   
   publish:
     
+    needs: build
     runs-on: ubuntu-latest
-    
     if: contains(github.ref, 'master')
     
     steps:
     - name: Package
-      needs: build
       run: |
         dotnet pack ./src/Debugosaurus.BigUnits/Debugosaurus.BigUnits.csproj --configuration Release --no-build -p:Version=$VERSION -p:PackageVersion=$VERSION -p:RepositoryUrl=https://github.com/debugosaurus/BigUnits
         dotnet pack ./src/Debugosaurus.BigUnits.Moq/Debugosaurus.BigUnits.Moq.csproj --configuration Release --no-build -p:Version=$VERSION -p:PackageVersion=$VERSION -p:RepositoryUrl=https://github.com/debugosaurus/BigUnits
