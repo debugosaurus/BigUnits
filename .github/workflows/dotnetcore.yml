@@ -28,5 +28,5 @@ jobs:
     - name: Publish
       if: contains(github.ref, 'master')
       run: |
-        dotnet nuget push "./src/Debugosaurus.BigUnits/bin/Release/Debugosaurus.BigUnits.$VERSION.nupkg" -k ${{ secrets.NUGET_DOT_ORG_PUBLISH_KEY }} -s https://api.nuget.org/v3/index.json
-        dotnet nuget push "./src/Debugosaurus.BigUnits.Moq/bin/Release/Debugosaurus.BigUnits.Moq.$VERSION.nupkg" -k ${{ secrets.NUGET_DOT_ORG_PUBLISH_KEY }} -s https://api.nuget.org/v3/index.json
+        dotnet nuget push "./src/Debugosaurus.BigUnits/bin/Release/BigUnits.$VERSION.nupkg" -k ${{ secrets.NUGET_DOT_ORG_PUBLISH_KEY }} -s https://api.nuget.org/v3/index.json
+        dotnet nuget push "./src/Debugosaurus.BigUnits.Moq/bin/Release/BigUnits.Moq.$VERSION.nupkg" -k ${{ secrets.NUGET_DOT_ORG_PUBLISH_KEY }} -s https://api.nuget.org/v3/index.json
